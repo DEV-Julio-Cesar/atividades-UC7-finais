@@ -1,9 +1,5 @@
 /* ===== RESET & BASE ===== */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,17 +11,8 @@ body {
   gap: 2rem;
 }
 
-h1 {
-  text-align: center;
-  color: #f5c518;
-  font-size: 1.8rem;
-}
-
-h2 {
-  font-size: 1.1rem;
-  color: #f5c518;
-  margin-bottom: 0.75rem;
-}
+h1 { text-align: center; color: #f5c518; font-size: 1.8rem; }
+h2 { font-size: 1.1rem; color: #f5c518; margin-bottom: 0.75rem; }
 
 /* ===== FORMULÁRIO ===== */
 form {
@@ -38,11 +25,8 @@ form {
   gap: 1rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
+.form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+.full-width { grid-column: 1 / -1; }
 
 label {
   font-size: 0.82rem;
@@ -52,8 +36,7 @@ label {
   letter-spacing: 0.04em;
 }
 
-input,
-select {
+input, select {
   padding: 0.5rem 0.75rem;
   border: 1px solid #333;
   border-radius: 8px;
@@ -64,10 +47,7 @@ select {
   transition: border-color 0.2s;
 }
 
-input:focus,
-select:focus {
-  border-color: #f5c518;
-}
+input:focus, select:focus { border-color: #f5c518; }
 
 .btn-reservar {
   grid-column: 1 / -1;
@@ -81,12 +61,58 @@ select:focus {
   cursor: pointer;
   transition: background 0.2s;
 }
+.btn-reservar:hover { background: #d4a800; }
 
-.btn-reservar:hover {
-  background: #d4a800;
+/* ===== TAGS COM TIPO POR CADEIRA ===== */
+.tags-box {
+  min-height: 48px;
+  background: #0d0d1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-/* ===== MAPA DE CADEIRAS ===== */
+.placeholder-tag { color: #555; font-size: 0.88rem; }
+
+/* Cada tag agrupa número da cadeira + select de tipo + botão remover */
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #22223a;
+  border: 1px solid #f5c518;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.tag-num { color: #f5c518; }
+
+.tag select {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #0d0d1a;
+  color: #eee;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #e53935;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+/* ===== MAPA ===== */
 .mapa-wrapper {
   background: #1a1a2e;
   border-radius: 12px;
@@ -103,15 +129,10 @@ select:focus {
   margin-bottom: 1rem;
 }
 
-.leg {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-}
-
-.leg-livre   { background: #2e7d32; }
-.leg-ocupada { background: #c62828; }
+.leg { display: inline-block; width: 20px; height: 20px; border-radius: 4px; }
+.leg-livre       { background: #2e7d32; }
+.leg-selecionada { background: #f5c518; }
+.leg-ocupada     { background: #c62828; }
 
 #mapa-cadeiras {
   display: grid;
@@ -120,30 +141,6 @@ select:focus {
   max-width: 480px;
 }
 
-/* Cada cadeira é um botão */
-.cadeira {
-  aspect-ratio: 1;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  cursor: pointer;
-  background: #2e7d32;
-  color: #fff;
-  transition: transform 0.1s, opacity 0.2s;
-}
-
-.cadeira:hover {
-  transform: scale(1.1);
-  opacity: 0.85;
-}
-
-.cadeira.ocupada {
-  background: #c62828;
-  cursor: not-allowed;
-}
-
-/* Tela do cinema */
 .tela {
   grid-column: 1 / -1;
   text-align: center;
@@ -157,6 +154,21 @@ select:focus {
   margin-bottom: 0.5rem;
 }
 
+.cadeira {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2e7d32;
+  color: #fff;
+  transition: transform 0.1s;
+}
+.cadeira:hover         { transform: scale(1.1); }
+.cadeira.selecionada   { background: #f5c518; color: #0d0d1a; }
+.cadeira.ocupada       { background: #c62828; cursor: not-allowed; }
+
 /* ===== TABELA ===== */
 .table-wrapper {
   background: #1a1a2e;
@@ -166,31 +178,26 @@ select:focus {
   overflow-x: auto;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-thead tr {
-  background: #f5c518;
-  color: #0d0d1a;
-}
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+thead tr { background: #f5c518; color: #0d0d1a; }
 
 th, td {
   padding: 0.6rem 0.8rem;
   text-align: left;
   border-bottom: 1px solid #2a2a3e;
-  white-space: nowrap;
 }
 
-tbody tr:hover {
-  background: #22223a;
-}
+tbody tr:hover { background: #22223a; }
+
+/* Lista de cadeiras dentro da célula */
+.lista-cadeiras { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.item-cadeira { font-size: 0.82rem; }
+.tipo-inteira  { color: #f5c518; font-weight: 700; }
+.tipo-estudante{ color: #4fc3f7; font-weight: 700; }
 
 /* ===== BOTÕES DE AÇÃO ===== */
-.btn-editar,
-.btn-excluir {
+.btn-editar, .btn-excluir {
   padding: 0.3rem 0.7rem;
   border: none;
   border-radius: 6px;
@@ -200,16 +207,10 @@ tbody tr:hover {
   margin-right: 4px;
   transition: opacity 0.2s;
 }
-
 .btn-editar  { background: #f5a623; color: #fff; }
 .btn-excluir { background: #e53935; color: #fff; }
+.btn-editar:hover, .btn-excluir:hover { opacity: 0.8; }
 
-.btn-editar:hover,
-.btn-excluir:hover {
-  opacity: 0.8;
-}
-
-/* ===== RESPONSIVO ===== */
 @media (max-width: 500px) {
   #mapa-cadeiras { grid-template-columns: repeat(5, 1fr); }
 }

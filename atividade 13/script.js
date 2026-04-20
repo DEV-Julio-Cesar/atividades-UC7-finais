@@ -1,82 +1,171 @@
-// Captura o tbody pelo id da tabela + getElementsByTagName (mesmo padrão da atividade 12)
+// Captura o tbody pelo id da tabela + getElementsByTagName (padrão da atividade 12)
 const tabela = document.getElementById('tabela-reservas').getElementsByTagName('tbody')[0]
 
-// Set que armazena os números das cadeiras já ocupadas
+// Set com cadeiras permanentemente ocupadas (já reservadas)
 const cadeirasOcupadas = new Set()
 
+// Map: número da cadeira → tipo ('Inteira' | 'Estudante')
+// Permite saber o tipo de cada cadeira selecionada individualmente
+const cadeirasSelecionadas = new Map()
+
 // ===== MAPA DE CADEIRAS =====
-// Gera os 50 botões de cadeira dinamicamente via createElement + appendChild
 function gerarMapa() {
   const mapa = document.getElementById('mapa-cadeiras')
 
-  // Cria a "tela" do cinema no topo do mapa
   const tela = document.createElement('div')
   tela.classList.add('tela')
   tela.textContent = '🎥 TELA'
   mapa.appendChild(tela)
 
-  // Loop de 1 a 50 — cria um botão para cada cadeira
   for (let i = 1; i <= 50; i++) {
     const btn = document.createElement('button')
     btn.classList.add('cadeira')
     btn.textContent = i
     btn.id = `cadeira-${i}`
+    btn.type = 'button'
 
-    // Ao clicar na cadeira, preenche o input automaticamente
-    btn.addEventListener('click', () => {
-      if (cadeirasOcupadas.has(i)) return // ignora cadeiras ocupadas
-      document.getElementById('cadeira').value = i
-    })
-
+    btn.addEventListener('click', () => toggleSelecionada(i))
     mapa.appendChild(btn)
   }
 }
 
-// Marca visualmente uma cadeira como ocupada no mapa
-function ocuparCadeira(numero) {
-  cadeirasOcupadas.add(numero)
+// Alterna seleção de uma cadeira no mapa
+function toggleSelecionada(numero) {
+  if (cadeirasOcupadas.has(numero)) return
+
   const btn = document.getElementById(`cadeira-${numero}`)
-  if (btn) btn.classList.add('ocupada')
+
+  if (cadeirasSelecionadas.has(numero)) {
+    // Deseleciona
+    cadeirasSelecionadas.delete(numero)
+    btn.classList.remove('selecionada')
+  } else {
+    // Seleciona com tipo padrão 'Inteira'
+    cadeirasSelecionadas.set(numero, 'Inteira')
+    btn.classList.add('selecionada')
+  }
+
+  atualizarTags()
 }
 
-// Libera visualmente uma cadeira no mapa
-function liberarCadeira(numero) {
-  cadeirasOcupadas.delete(numero)
-  const btn = document.getElementById(`cadeira-${numero}`)
-  if (btn) btn.classList.remove('ocupada')
+// Renderiza as tags — cada uma com número + select de tipo + botão remover
+function atualizarTags() {
+  const box = document.getElementById('cadeiras-selecionadas')
+  box.innerHTML = ''
+
+  if (cadeirasSelecionadas.size === 0) {
+    box.innerHTML = '<span class="placeholder-tag">Clique nas cadeiras no mapa abaixo</span>'
+    return
+  }
+
+  const ordenadas = [...cadeirasSelecionadas.keys()].sort((a, b) => a - b)
+
+  ordenadas.forEach(numero => {
+    const tipo = cadeirasSelecionadas.get(numero)
+
+    const tag = document.createElement('div')
+    tag.classList.add('tag')
+
+    // Número da cadeira
+    const num = document.createElement('span')
+    num.classList.add('tag-num')
+    num.textContent = `Cadeira ${numero}`
+
+    // Select de tipo — individual por cadeira
+    const sel = document.createElement('select')
+    sel.innerHTML = `
+      <option value="Inteira"   ${tipo === 'Inteira'   ? 'selected' : ''}>🎟️ Inteira</option>
+      <option value="Estudante" ${tipo === 'Estudante' ? 'selected' : ''}>🎓 Estudante</option>
+    `
+    // Atualiza o Map quando o usuário muda o tipo
+    sel.addEventListener('change', () => {
+      cadeirasSelecionadas.set(numero, sel.value)
+    })
+
+    // Botão remover
+    const removeBtn = document.createElement('button')
+    removeBtn.classList.add('tag-remove')
+    removeBtn.type = 'button'
+    removeBtn.textContent = '✕'
+    removeBtn.addEventListener('click', () => removerCadeira(numero))
+
+    tag.appendChild(num)
+    tag.appendChild(sel)
+    tag.appendChild(removeBtn)
+    box.appendChild(tag)
+  })
 }
 
-// ===== CADASTRO DE RESERVA =====
+// Remove uma cadeira da seleção
+function removerCadeira(numero) {
+  cadeirasSelecionadas.delete(numero)
+  const btn = document.getElementById(`cadeira-${numero}`)
+  if (btn) btn.classList.remove('selecionada')
+  atualizarTags()
+}
+
+// Marca cadeiras como ocupadas após reserva
+function ocuparCadeiras(lista) {
+  lista.forEach(numero => {
+    cadeirasOcupadas.add(numero)
+    cadeirasSelecionadas.delete(numero)
+    const btn = document.getElementById(`cadeira-${numero}`)
+    if (btn) { btn.classList.remove('selecionada'); btn.classList.add('ocupada') }
+  })
+}
+
+// Libera cadeiras ao excluir ou editar
+function liberarCadeiras(lista) {
+  lista.forEach(numero => {
+    cadeirasOcupadas.delete(numero)
+    const btn = document.getElementById(`cadeira-${numero}`)
+    if (btn) btn.classList.remove('ocupada')
+  })
+}
+
+// ===== CADASTRO =====
 function cadastrar(evento) {
   evento.preventDefault()
 
-  const nome    = document.getElementById('nome').value
-  const filme   = document.getElementById('filme').value
-  const data    = document.getElementById('data').value
-  const cadeira = parseInt(document.getElementById('cadeira').value)
+  const nome  = document.getElementById('nome').value
+  const filme = document.getElementById('filme').value
+  const data  = document.getElementById('data').value
 
-  if (!nome || !filme || !data || !cadeira) {
+  if (!nome || !filme || !data) {
     alert('Por favor, preencha todos os campos.')
     return
   }
 
-  if (cadeirasOcupadas.has(cadeira)) {
-    alert(`A cadeira ${cadeira} já está ocupada. Escolha outra.`)
+  if (cadeirasSelecionadas.size === 0) {
+    alert('Selecione ao menos uma cadeira no mapa.')
     return
   }
 
-  // Marca a cadeira como ocupada no mapa
-  ocuparCadeira(cadeira)
+  // Monta lista ordenada de { numero, tipo }
+  const lista = [...cadeirasSelecionadas.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([numero, tipo]) => ({ numero, tipo }))
+
+  ocuparCadeiras(lista.map(c => c.numero))
+
+  // Gera o HTML interno da célula de cadeiras:
+  // cada cadeira em uma linha com seu tipo colorido
+  const cadeirasHtml = lista.map(c => {
+    const cls = c.tipo === 'Inteira' ? 'tipo-inteira' : 'tipo-estudante'
+    return `<div class="item-cadeira">Cadeira ${c.numero} — <span class="${cls}">${c.tipo}</span></div>`
+  }).join('')
+
+  // Armazena JSON no data-attribute para recuperar no editar/excluir
+  const dadosJson = JSON.stringify(lista)
 
   const linha = tabela.insertRow() // cria <tr></tr> no tbody
 
   // innerHTML com template literal — preenche todas as células de uma vez
-  // Botões inline passando this como parâmetro (padrão da atividade 12)
   linha.innerHTML = `
     <td>${nome}</td>
     <td>${filme}</td>
     <td>${data}</td>
-    <td>${cadeira}</td>
+    <td data-cadeiras='${dadosJson}'><div class="lista-cadeiras">${cadeirasHtml}</div></td>
     <td>
       <button class="btn-editar"  onclick="editar(this)">✏️ Editar</button>
       <button class="btn-excluir" onclick="excluir(this)">🗑️ Excluir</button>
@@ -84,45 +173,51 @@ function cadastrar(evento) {
   `
 
   document.getElementById('form-reserva').reset()
+  atualizarTags()
   document.getElementById('nome').focus()
 }
 
-// Remove a linha e libera a cadeira no mapa
+// Remove a linha e libera as cadeiras
 // Navegação DOM: botão → <td> → <tr> → .remove()
 function excluir(elemento) {
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
-  const numero  = parseInt(celulas[3].innerText)
+  const lista   = JSON.parse(celulas[3].dataset.cadeiras)
 
-  liberarCadeira(numero)
+  liberarCadeiras(lista.map(c => c.numero))
   linha.remove()
 }
 
-// Devolve os dados da linha para os inputs e libera a cadeira para reedição
+// Devolve dados para o formulário e reseleciona cadeiras no mapa
 function editar(elemento) {
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
+  const lista   = JSON.parse(celulas[3].dataset.cadeiras)
 
-  const numero = parseInt(celulas[3].innerText)
-  liberarCadeira(numero) // libera a cadeira para poder reatribuir
+  liberarCadeiras(lista.map(c => c.numero))
 
-  document.getElementById('nome').value    = celulas[0].innerText
-  document.getElementById('filme').value   = celulas[1].innerText
-  document.getElementById('data').value    = celulas[2].innerText
-  document.getElementById('cadeira').value = celulas[3].innerText
+  document.getElementById('nome').value  = celulas[0].innerText
+  document.getElementById('filme').value = celulas[1].innerText
+  document.getElementById('data').value  = celulas[2].innerText
 
+  // Reseleciona cada cadeira com o tipo que já tinha
+  lista.forEach(({ numero, tipo }) => {
+    cadeirasSelecionadas.set(numero, tipo)
+    const btn = document.getElementById(`cadeira-${numero}`)
+    if (btn) btn.classList.add('selecionada')
+  })
+
+  atualizarTags()
   linha.remove()
   document.getElementById('nome').focus()
 }
 
 document.getElementById('btn-reservar').addEventListener('click', cadastrar)
 
-// keydown no último input — dispara cadastro ao pressionar Enter
-document.getElementById('cadeira').addEventListener('keydown', (evento) => {
-  if (evento.key === 'Enter') {
-    cadastrar(evento)
-  }
+// keydown no select de filme — dispara cadastro ao pressionar Enter
+document.getElementById('data').addEventListener('keydown', (evento) => {
+  if (evento.key === 'Enter') cadastrar(evento)
 })
 
-// Inicializa o mapa ao carregar a página
+// Inicializa o mapa
 gerarMapa()
