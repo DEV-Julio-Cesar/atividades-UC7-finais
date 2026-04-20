@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exercícios DOM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== EXERCÍCIO 1: LISTA DE COMPRAS ===== -->
+  <section id="shopping-section">
+    <h1>🛒 Lista de Compras</h1>
+
+    <form id="shopping-form">
+      <input
+        type="text"
+        id="product-input"
+        placeholder="Nome do produto..."
+        autocomplete="off"
+        required
+      />
+      <select id="category-select">
+        <option value="frutas">🍎 Frutas</option>
+        <option value="limpeza">🧹 Limpeza</option>
+        <option value="mercearia">🛍️ Mercearia</option>
+        <option value="congelados">🧊 Congelados</option>
+        <option value="bebidas">🥤 Bebidas</option>
+        <option value="padaria">🍞 Padaria</option>
+      </select>
+      <button type="submit">Adicionar</button>
+    </form>
+
+    <!-- As listas de categorias serão injetadas aqui pelo JS -->
+    <div id="categories-container"></div>
+  </section>
+
+  <!-- ===== EXERCÍCIO 2: KANBAN ===== -->
+  <section id="kanban-section">
+    <h1>📋 Quadro Kanban</h1>
+
+    <form id="kanban-form">
+      <input
+        type="text"
+        id="task-title"
+        placeholder="Título da tarefa..."
+        required
+      />
+      <textarea
+        id="task-desc"
+        placeholder="Descrição da tarefa..."
+        rows="2"
+      ></textarea>
+      <select id="task-priority">
+        <option value="baixa">🟢 Baixa</option>
+        <option value="media">🟡 Média</option>
+        <option value="alta">🔴 Alta</option>
+      </select>
+      <div class="kanban-form-buttons">
+        <button type="submit">Adicionar</button>
+        <button type="button" id="clear-btn">Limpar</button>
+      </div>
+    </form>
+
+    <div id="kanban-board">
+      <!-- Coluna To Do -->
+      <div class="kanban-column" id="col-todo">
+        <h2>📌 To Do</h2>
+        <div class="cards-container" data-column="todo"></div>
+      </div>
+      <!-- Coluna Doing -->
+      <div class="kanban-column" id="col-doing">
+        <h2>⚙️ Doing</h2>
+        <div class="cards-container" data-column="doing"></div>
+      </div>
+      <!-- Coluna Done -->
+      <div class="kanban-column" id="col-done">
+        <h2>✅ Done</h2>
+        <div class="cards-container" data-column="done"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

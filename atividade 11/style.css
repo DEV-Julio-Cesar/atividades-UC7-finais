@@ -1,0 +1,275 @@
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ===== SEÇÕES ===== */
+section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* ===== FORMULÁRIOS ===== */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+input[type="text"],
+textarea,
+select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #4a90e2;
+}
+
+#product-input {
+  flex: 1;
+  min-width: 180px;
+}
+
+#task-title {
+  flex: 1;
+  min-width: 200px;
+}
+
+#task-desc {
+  width: 100%;
+  resize: vertical;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+button:hover { opacity: 0.85; }
+button:active { transform: scale(0.97); }
+
+/* Botão principal */
+form button[type="submit"] {
+  background: #4a90e2;
+  color: #fff;
+}
+
+/* Botão limpar */
+#clear-btn {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.kanban-form-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ===== EXERCÍCIO 1 — LISTA DE COMPRAS ===== */
+#categories-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.category-block {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  min-width: 200px;
+  flex: 1;
+}
+
+.category-block h3 {
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  color: #444;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 0.3rem;
+}
+
+.category-block ol {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Texto do item */
+.item-text {
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Item marcado como comprado */
+.item-text.bought {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+/* Botão excluir item */
+.delete-item-btn {
+  background: #ff5c5c;
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
+
+/* ===== EXERCÍCIO 2 — KANBAN ===== */
+#kanban-board {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+}
+
+.kanban-column {
+  flex: 1;
+  min-width: 240px;
+  background: #f0f4ff;
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid #d0d8f0;
+}
+
+#col-todo  { border-top: 4px solid #4a90e2; }
+#col-doing { border-top: 4px solid #f5a623; }
+#col-done  { border-top: 4px solid #7ed321; }
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 60px;
+}
+
+/* ===== CARD KANBAN ===== */
+.kanban-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  border-left: 5px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Cores de prioridade (borda esquerda) */
+.kanban-card.alta   { border-left-color: #e74c3c; }
+.kanban-card.media  { border-left-color: #f1c40f; }
+.kanban-card.baixa  { border-left-color: #2ecc71; }
+
+.card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.card-desc {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.card-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-priority.alta  { color: #e74c3c; }
+.card-priority.media { color: #d4a017; }
+.card-priority.baixa { color: #27ae60; }
+
+/* Botões do card */
+.card-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.card-actions button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.btn-advance {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.btn-edit {
+  background: #f5a623;
+  color: #fff;
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* Modo edição inline */
+.card-edit-input {
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 600px) {
+  body { padding: 1rem; }
+  #kanban-board { flex-direction: column; }
+}
