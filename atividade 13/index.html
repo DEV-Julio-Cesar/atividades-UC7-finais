@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,14 +8,17 @@
 </head>
 <body>
 
+  <!-- Botão tema -->
+  <button id="btn-tema" title="Alternar tema">🌙</button>
+
   <h1>🎬 Cinema — Reserva de Ingressos</h1>
 
+  <!-- ===== FORMULÁRIO ===== -->
   <form id="form-reserva">
     <div class="form-group">
       <label for="nome">Nome do Cliente</label>
       <input type="text" id="nome" placeholder="Nome completo" required />
     </div>
-
     <div class="form-group">
       <label for="filme">Filme em Cartaz</label>
       <select id="filme" required>
@@ -27,12 +30,10 @@
         <option value="Alien: Romulus">Alien: Romulus</option>
       </select>
     </div>
-
     <div class="form-group">
       <label for="data">Data da Sessão</label>
       <input type="date" id="data" required />
     </div>
-
     <div class="form-group">
       <label for="horario">Horário</label>
       <select id="horario" required>
@@ -41,24 +42,20 @@
         <option value="20:00">🕗 20:00</option>
       </select>
     </div>
-
-    <!-- Cadeiras selecionadas com tipo e total -->
     <div class="form-group full-width">
       <label>Cadeiras Selecionadas <span id="contador-sel" class="contador-sel"></span></label>
       <div id="cadeiras-selecionadas" class="tags-box">
         <span class="placeholder-tag">Clique nas cadeiras no mapa abaixo (máx. 6)</span>
       </div>
     </div>
-
     <div class="form-group full-width total-box">
       <span>Total estimado:</span>
       <strong id="total-valor">R$ 0,00</strong>
     </div>
-
     <button type="button" class="btn-reservar" id="btn-reservar">Reservar</button>
   </form>
 
-  <!-- MAPA -->
+  <!-- ===== MAPA ===== -->
   <div class="mapa-wrapper">
     <h2>🪑 Mapa de Cadeiras</h2>
     <div class="mapa-info">
@@ -70,27 +67,40 @@
       <p id="contador-mapa" class="contador-mapa">50 livres · 0 ocupadas</p>
     </div>
     <div id="mapa-cadeiras"></div>
-    <!-- Tooltip -->
     <div id="tooltip" class="tooltip"></div>
   </div>
 
-  <!-- TABELA -->
+  <!-- ===== TABELA ===== -->
   <div class="table-wrapper">
-    <h2>📋 Reservas Realizadas</h2>
+    <div class="table-header">
+      <h2>📋 Reservas Realizadas</h2>
+      <input type="text" id="filtro" placeholder="🔍 Buscar por nome ou filme..." class="input-filtro" />
+    </div>
     <table id="tabela-reservas">
       <thead>
         <tr>
-          <th>Cliente</th>
-          <th>Filme</th>
-          <th>Data</th>
-          <th>Horário</th>
-          <th>Cadeiras</th>
-          <th>Total</th>
+          <th data-col="0" class="sortable">Cliente <span class="sort-icon">↕</span></th>
+          <th data-col="1" class="sortable">Filme <span class="sort-icon">↕</span></th>
+          <th data-col="2" class="sortable">Data <span class="sort-icon">↕</span></th>
+          <th data-col="3">Horário</th>
+          <th data-col="4">Cadeiras</th>
+          <th data-col="5" class="sortable">Total <span class="sort-icon">↕</span></th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tbody-reservas"></tbody>
     </table>
+  </div>
+
+  <!-- ===== MODAL COMPROVANTE ===== -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div id="modal-conteudo" class="modal-conteudo"></div>
+      <div class="modal-acoes">
+        <button id="btn-imprimir" class="btn-imprimir">🖨️ Imprimir</button>
+        <button id="btn-fechar"   class="btn-fechar">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>

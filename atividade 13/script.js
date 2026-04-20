@@ -4,21 +4,32 @@ const PRECO_ESTUDANTE = 15
 const MAX_CADEIRAS    = 6
 
 // ===== ESTADO =====
-// Captura o tbody pelo id da tabela + getElementsByTagName (padrão da atividade 12)
 const tabela = document.getElementById('tabela-reservas').getElementsByTagName('tbody')[0]
 
-// Map: chave "filme|data|horario" → Set de cadeiras ocupadas
-// Permite que a mesma cadeira seja reservada em sessões diferentes
+// Map: "filme|data|horario" → Set de cadeiras ocupadas (por sessão)
 const ocupadasPorSessao = new Map()
 
-// Map: número → tipo ('Inteira' | 'Estudante') — cadeiras em seleção atual
+// Map: número → tipo — cadeiras em seleção atual
 const cadeirasSelecionadas = new Map()
 
-// Referência ao tooltip
+// Controle de ordenação da tabela
+const sortState = { col: -1, asc: true }
+
 const tooltip = document.getElementById('tooltip')
 
-// ===== SESSÃO ATUAL =====
-// Retorna a chave da sessão com base nos campos do formulário
+// ===== TEMA =====
+function aplicarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema)
+  document.getElementById('btn-tema').textContent = tema === 'dark' ? '🌙' : '☀️'
+  localStorage.setItem('cinema-tema', tema)
+}
+
+document.getElementById('btn-tema').addEventListener('click', () => {
+  const atual = document.documentElement.getAttribute('data-theme')
+  aplicarTema(atual === 'dark' ? 'light' : 'dark')
+})
+
+// ===== SESSÃO =====
 function chaveSessao() {
   const filme   = document.getElementById('filme').value
   const data    = document.getElementById('data').value
@@ -26,13 +37,12 @@ function chaveSessao() {
   return `${filme}|${data}|${horario}`
 }
 
-// Retorna o Set de cadeiras ocupadas da sessão atual (cria se não existir)
 function ocupadasDaSessao(chave) {
   if (!ocupadasPorSessao.has(chave)) ocupadasPorSessao.set(chave, new Set())
   return ocupadasPorSessao.get(chave)
 }
 
-// ===== MAPA DE CADEIRAS =====
+// ===== MAPA =====
 function gerarMapa() {
   const mapa = document.getElementById('mapa-cadeiras')
 
@@ -57,11 +67,10 @@ function gerarMapa() {
   }
 }
 
-// Atualiza o visual do mapa conforme a sessão selecionada no formulário
 function atualizarMapa() {
   const chave    = chaveSessao()
   const ocupadas = ocupadasDaSessao(chave)
-  let livres = 0, ocupadasCount = 0
+  let ocupadasCount = 0
 
   for (let i = 1; i <= 50; i++) {
     const btn = document.getElementById(`cadeira-${i}`)
@@ -72,9 +81,6 @@ function atualizarMapa() {
       ocupadasCount++
     } else if (cadeirasSelecionadas.has(i)) {
       btn.classList.add('selecionada')
-      livres++
-    } else {
-      livres++
     }
   }
 
@@ -82,12 +88,10 @@ function atualizarMapa() {
     `${50 - ocupadasCount} livres · ${ocupadasCount} ocupadas`
 }
 
-// Alterna seleção de uma cadeira
 function toggleSelecionada(numero) {
   const chave    = chaveSessao()
   const ocupadas = ocupadasDaSessao(chave)
-
-  if (ocupadas.has(numero)) return // já reservada nessa sessão
+  if (ocupadas.has(numero)) return
 
   const btn = document.getElementById(`cadeira-${numero}`)
 
@@ -122,21 +126,17 @@ function mostrarTooltip(e, numero) {
   tooltip.classList.add('visivel')
   moverTooltip(e)
 }
-
 function moverTooltip(e) {
   tooltip.style.left = (e.clientX + 12) + 'px'
   tooltip.style.top  = (e.clientY + 12) + 'px'
 }
-
-function esconderTooltip() {
-  tooltip.classList.remove('visivel')
-}
+function esconderTooltip() { tooltip.classList.remove('visivel') }
 
 // ===== TAGS =====
 function atualizarTags() {
-  const box = document.getElementById('cadeiras-selecionadas')
+  const box      = document.getElementById('cadeiras-selecionadas')
   const contador = document.getElementById('contador-sel')
-  box.innerHTML = ''
+  box.innerHTML  = ''
 
   if (cadeirasSelecionadas.size === 0) {
     box.innerHTML = `<span class="placeholder-tag">Clique nas cadeiras no mapa abaixo (máx. ${MAX_CADEIRAS})</span>`
@@ -146,9 +146,7 @@ function atualizarTags() {
 
   contador.textContent = `(${cadeirasSelecionadas.size}/${MAX_CADEIRAS})`
 
-  const ordenadas = [...cadeirasSelecionadas.keys()].sort((a, b) => a - b)
-
-  ordenadas.forEach(numero => {
+  ;[...cadeirasSelecionadas.keys()].sort((a, b) => a - b).forEach(numero => {
     const tipo = cadeirasSelecionadas.get(numero)
 
     const tag = document.createElement('div')
@@ -174,8 +172,7 @@ function atualizarTags() {
     removeBtn.textContent = '✕'
     removeBtn.addEventListener('click', () => {
       cadeirasSelecionadas.delete(numero)
-      const btn = document.getElementById(`cadeira-${numero}`)
-      if (btn) btn.classList.remove('selecionada')
+      document.getElementById(`cadeira-${numero}`).classList.remove('selecionada')
       atualizarTags()
       atualizarTotal()
       atualizarMapa()
@@ -198,11 +195,81 @@ function atualizarTotal() {
     `R$ ${total.toFixed(2).replace('.', ',')}`
 }
 
-// ===== PERSISTÊNCIA (localStorage) =====
+// ===== MODAL COMPROVANTE =====
+function abrirModal(dados) {
+  const cadeirasHtml = dados.lista.map(c => {
+    const cls = c.tipo === 'Inteira' ? 'tipo-inteira' : 'tipo-estudante'
+    return `<div class="item-cadeira">Cadeira ${c.numero} — <span class="${cls}">${c.tipo}</span></div>`
+  }).join('')
+
+  document.getElementById('modal-conteudo').innerHTML = `
+    <h3>✅ Reserva Confirmada!</h3>
+    <p><strong>Cliente:</strong> ${dados.nome}</p>
+    <p><strong>Filme:</strong> ${dados.filme}</p>
+    <p><strong>Data:</strong> ${dados.data} às ${dados.horario}</p>
+    <div class="comprovante-cadeiras">${cadeirasHtml}</div>
+    <p style="margin-top:0.75rem"><strong>Total:</strong> ${dados.totalStr}</p>
+  `
+  document.getElementById('modal-overlay').classList.remove('hidden')
+}
+
+document.getElementById('btn-fechar').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.add('hidden')
+})
+
+document.getElementById('btn-imprimir').addEventListener('click', () => {
+  window.print()
+})
+
+// Fecha modal ao clicar fora
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.add('hidden')
+  }
+})
+
+// ===== FILTRO =====
+document.getElementById('filtro').addEventListener('input', function () {
+  const termo = this.value.toLowerCase()
+  tabela.querySelectorAll('tr').forEach(linha => {
+    const celulas = linha.querySelectorAll('td')
+    if (!celulas.length) return
+    const nome  = celulas[0].innerText.toLowerCase()
+    const filme = celulas[1].innerText.toLowerCase()
+    linha.classList.toggle('oculta', !nome.includes(termo) && !filme.includes(termo))
+  })
+})
+
+// ===== ORDENAÇÃO =====
+document.querySelectorAll('th.sortable').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = parseInt(th.dataset.col)
+
+    if (sortState.col === col) {
+      sortState.asc = !sortState.asc
+    } else {
+      sortState.col = col
+      sortState.asc = true
+    }
+
+    // Atualiza ícones
+    document.querySelectorAll('th.sortable .sort-icon').forEach(ic => ic.textContent = '↕')
+    th.querySelector('.sort-icon').textContent = sortState.asc ? '↑' : '↓'
+
+    const linhas = [...tabela.querySelectorAll('tr')]
+    linhas.sort((a, b) => {
+      const ta = a.querySelectorAll('td')[col]?.innerText.trim() || ''
+      const tb = b.querySelectorAll('td')[col]?.innerText.trim() || ''
+      return sortState.asc ? ta.localeCompare(tb, 'pt') : tb.localeCompare(ta, 'pt')
+    })
+    linhas.forEach(l => tabela.appendChild(l))
+  })
+})
+
+// ===== PERSISTÊNCIA =====
 function salvarReservas() {
   const linhas = tabela.querySelectorAll('tr')
   const dados  = []
-
   linhas.forEach(linha => {
     const celulas = linha.querySelectorAll('td')
     if (!celulas.length) return
@@ -215,18 +282,16 @@ function salvarReservas() {
       total:    celulas[5].innerText,
     })
   })
-
   localStorage.setItem('cinema-reservas', JSON.stringify(dados))
 }
 
 function carregarReservas() {
   const dados = JSON.parse(localStorage.getItem('cinema-reservas') || '[]')
-  dados.forEach(r => inserirLinha(r.nome, r.filme, r.data, r.horario, r.cadeiras, r.total))
+  dados.forEach(r => inserirLinha(r.nome, r.filme, r.data, r.horario, r.cadeiras, r.total, false))
 }
 
-// ===== INSERIR LINHA NA TABELA =====
-function inserirLinha(nome, filme, data, horario, lista, totalStr) {
-  // Marca cadeiras como ocupadas na sessão correspondente
+// ===== INSERIR LINHA =====
+function inserirLinha(nome, filme, data, horario, lista, totalStr, animar = true) {
   const chave    = `${filme}|${data}|${horario}`
   const ocupadas = ocupadasDaSessao(chave)
   lista.forEach(c => ocupadas.add(c.numero))
@@ -236,9 +301,8 @@ function inserirLinha(nome, filme, data, horario, lista, totalStr) {
     return `<div class="item-cadeira">Cadeira ${c.numero} — <span class="${cls}">${c.tipo}</span></div>`
   }).join('')
 
-  const dadosJson = JSON.stringify(lista)
-
   const linha = tabela.insertRow() // cria <tr></tr> no tbody
+  if (animar) linha.classList.add('linha-nova')
 
   // innerHTML com template literal — preenche todas as células de uma vez
   linha.innerHTML = `
@@ -246,7 +310,7 @@ function inserirLinha(nome, filme, data, horario, lista, totalStr) {
     <td>${filme}</td>
     <td>${data}</td>
     <td>${horario}</td>
-    <td data-cadeiras='${dadosJson}'><div class="lista-cadeiras">${cadeirasHtml}</div></td>
+    <td data-cadeiras='${JSON.stringify(lista)}'><div class="lista-cadeiras">${cadeirasHtml}</div></td>
     <td class="total-cell">${totalStr}</td>
     <td>
       <button class="btn-editar"  onclick="editar(this)">✏️ Editar</button>
@@ -274,6 +338,20 @@ function cadastrar(evento) {
     return
   }
 
+  // Valida nome duplicado na mesma sessão
+  const chave = `${filme}|${data}|${horario}`
+  const jaExiste = [...tabela.querySelectorAll('tr')].some(linha => {
+    const celulas = linha.querySelectorAll('td')
+    return celulas.length &&
+      celulas[0].innerText.trim().toLowerCase() === nome.trim().toLowerCase() &&
+      `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}` === chave
+  })
+
+  if (jaExiste) {
+    alert(`"${nome}" já possui uma reserva para essa sessão.`)
+    return
+  }
+
   const lista = [...cadeirasSelecionadas.entries()]
     .sort((a, b) => a[0] - b[0])
     .map(([numero, tipo]) => ({ numero, tipo }))
@@ -284,26 +362,27 @@ function cadastrar(evento) {
 
   inserirLinha(nome, filme, data, horario, lista, totalStr)
   salvarReservas()
-  atualizarMapa()
+
+  // Abre modal comprovante
+  abrirModal({ nome, filme, data, horario, lista, totalStr })
 
   cadeirasSelecionadas.clear()
   document.getElementById('form-reserva').reset()
   document.getElementById('data').min = new Date().toISOString().split('T')[0]
   atualizarTags()
   atualizarTotal()
+  atualizarMapa()
   document.getElementById('nome').focus()
 }
 
-// Remove a linha, libera cadeiras e atualiza localStorage
-// Navegação DOM: botão → <td> → <tr> → .remove()
+// Remove com confirmação — botão → <td> → <tr> → .remove()
 function excluir(elemento) {
+  if (!confirm('Deseja excluir esta reserva?')) return
+
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
   const lista   = JSON.parse(celulas[4].dataset.cadeiras)
-  const filme   = celulas[1].innerText
-  const data    = celulas[2].innerText
-  const horario = celulas[3].innerText
-  const chave   = `${filme}|${data}|${horario}`
+  const chave   = `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}`
 
   lista.forEach(c => ocupadasDaSessao(chave).delete(c.numero))
   linha.remove()
@@ -311,7 +390,7 @@ function excluir(elemento) {
   atualizarMapa()
 }
 
-// Devolve dados para o formulário e reseleciona cadeiras no mapa
+// Devolve dados para o formulário e reseleciona cadeiras
 function editar(elemento) {
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
@@ -330,8 +409,7 @@ function editar(elemento) {
 
   lista.forEach(({ numero, tipo }) => {
     cadeirasSelecionadas.set(numero, tipo)
-    const btn = document.getElementById(`cadeira-${numero}`)
-    if (btn) btn.classList.add('selecionada')
+    document.getElementById(`cadeira-${numero}`).classList.add('selecionada')
   })
 
   atualizarTags()
@@ -342,7 +420,7 @@ function editar(elemento) {
   document.getElementById('nome').focus()
 }
 
-// Atualiza o mapa quando o usuário muda filme, data ou horário
+// Atualiza mapa ao trocar sessão
 ;['filme', 'data', 'horario'].forEach(id => {
   document.getElementById(id).addEventListener('change', atualizarMapa)
 })
@@ -354,7 +432,10 @@ document.getElementById('data').addEventListener('keydown', (evento) => {
 })
 
 // ===== INICIALIZAÇÃO =====
+const temaSalvo = localStorage.getItem('cinema-tema') || 'dark'
+aplicarTema(temaSalvo)
+
 document.getElementById('data').min = new Date().toISOString().split('T')[0]
 gerarMapa()
-carregarReservas() // restaura reservas salvas no localStorage
+carregarReservas()
 atualizarMapa()
