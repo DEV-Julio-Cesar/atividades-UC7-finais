@@ -1,0 +1,215 @@
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0d0d1a;
+  color: #eee;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+h1 {
+  text-align: center;
+  color: #f5c518;
+  font-size: 1.8rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  color: #f5c518;
+  margin-bottom: 0.75rem;
+}
+
+/* ===== FORMULÁRIO ===== */
+form {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+input,
+select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #0d0d1a;
+  color: #eee;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: #f5c518;
+}
+
+.btn-reservar {
+  grid-column: 1 / -1;
+  padding: 0.65rem;
+  background: #f5c518;
+  color: #0d0d1a;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reservar:hover {
+  background: #d4a800;
+}
+
+/* ===== MAPA DE CADEIRAS ===== */
+.mapa-wrapper {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 1rem;
+}
+
+.leg {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.leg-livre   { background: #2e7d32; }
+.leg-ocupada { background: #c62828; }
+
+#mapa-cadeiras {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 0.4rem;
+  max-width: 480px;
+}
+
+/* Cada cadeira é um botão */
+.cadeira {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2e7d32;
+  color: #fff;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.cadeira:hover {
+  transform: scale(1.1);
+  opacity: 0.85;
+}
+
+.cadeira.ocupada {
+  background: #c62828;
+  cursor: not-allowed;
+}
+
+/* Tela do cinema */
+.tela {
+  grid-column: 1 / -1;
+  text-align: center;
+  background: #f5c518;
+  color: #0d0d1a;
+  border-radius: 4px;
+  padding: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== TABELA ===== */
+.table-wrapper {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead tr {
+  background: #f5c518;
+  color: #0d0d1a;
+}
+
+th, td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #2a2a3e;
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #22223a;
+}
+
+/* ===== BOTÕES DE AÇÃO ===== */
+.btn-editar,
+.btn-excluir {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: opacity 0.2s;
+}
+
+.btn-editar  { background: #f5a623; color: #fff; }
+.btn-excluir { background: #e53935; color: #fff; }
+
+.btn-editar:hover,
+.btn-excluir:hover {
+  opacity: 0.8;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 500px) {
+  #mapa-cadeiras { grid-template-columns: repeat(5, 1fr); }
+}

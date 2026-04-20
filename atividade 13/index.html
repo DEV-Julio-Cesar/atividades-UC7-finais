@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cinema — Reserva de Ingressos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>🎬 Cinema — Reserva de Ingressos</h1>
+
+  <!-- ===== FORMULÁRIO DE RESERVA ===== -->
+  <form id="form-reserva">
+    <div class="form-group">
+      <label for="nome">Nome do Cliente</label>
+      <input type="text" id="nome" placeholder="Nome completo" required />
+    </div>
+
+    <div class="form-group">
+      <label for="filme">Filme em Cartaz</label>
+      <select id="filme" required>
+        <option value="">Selecione um filme...</option>
+        <option value="Missão Impossível 8">Missão Impossível 8</option>
+        <option value="Deadpool & Wolverine">Deadpool & Wolverine</option>
+        <option value="Duna: Parte 2">Duna: Parte 2</option>
+        <option value="Divertida Mente 2">Divertida Mente 2</option>
+        <option value="Alien: Romulus">Alien: Romulus</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="data">Data da Sessão</label>
+      <input type="date" id="data" required />
+    </div>
+
+    <div class="form-group">
+      <label for="cadeira">Cadeira (1 a 50)</label>
+      <input type="number" id="cadeira" placeholder="Ex: 12" min="1" max="50" required />
+    </div>
+
+    <button type="button" class="btn-reservar" id="btn-reservar">Reservar</button>
+  </form>
+
+  <!-- ===== MAPA DE CADEIRAS ===== -->
+  <div class="mapa-wrapper">
+    <h2>🪑 Mapa de Cadeiras</h2>
+    <p class="legenda">
+      <span class="leg leg-livre"></span> Livre
+      <span class="leg leg-ocupada"></span> Ocupada
+    </p>
+    <div id="mapa-cadeiras"></div>
+  </div>
+
+  <!-- ===== TABELA DE RESERVAS ===== -->
+  <div class="table-wrapper">
+    <h2>📋 Reservas Realizadas</h2>
+    <table id="tabela-reservas">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Filme</th>
+          <th>Data</th>
+          <th>Cadeira</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-reservas"></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
