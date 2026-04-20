@@ -144,6 +144,11 @@ const PRECO_INTEIRA   = 30
 const PRECO_ESTUDANTE = 15
 const MAX_CADEIRAS    = 6
 
+// Retorna a quantidade de cadeiras da sala selecionada
+function totalCadeiras() {
+  return parseInt(document.getElementById('sala').value) || 35
+}
+
 // ===== ESTADO =====
 const tabela = document.getElementById('tabela-reservas').getElementsByTagName('tbody')[0]
 
@@ -175,7 +180,8 @@ function chaveSessao() {
   const filme   = document.getElementById('filme').value
   const data    = document.getElementById('data').value
   const horario = document.getElementById('horario').value
-  return `${filme}|${data}|${horario}`
+  const sala    = document.getElementById('sala').value
+  return `${filme}|${data}|${horario}|${sala}`
 }
 
 function ocupadasDaSessao(chave) {
@@ -185,14 +191,23 @@ function ocupadasDaSessao(chave) {
 
 // ===== MAPA =====
 function gerarMapa() {
-  const mapa = document.getElementById('mapa-cadeiras')
+  renderizarMapa()
+}
+
+// Reconstrói o mapa inteiro conforme a sala selecionada
+function renderizarMapa() {
+  const total = totalCadeiras()
+  const cols  = total === 35 ? 7 : 10   // 35 = 5 fileiras x 7 | 70 = 7 fileiras x 10
+  const mapa  = document.getElementById('mapa-cadeiras')
+  mapa.innerHTML = ''
+  mapa.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
 
   const tela = document.createElement('div')
   tela.classList.add('tela')
   tela.textContent = '🎥 TELA'
   mapa.appendChild(tela)
 
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= total; i++) {
     const btn = document.createElement('button')
     btn.classList.add('cadeira')
     btn.textContent = i
@@ -206,15 +221,22 @@ function gerarMapa() {
 
     mapa.appendChild(btn)
   }
+
+  // Limpa seleção ao trocar de sala
+  cadeirasSelecionadas.clear()
+  atualizarTags()
+  atualizarTotal()
 }
 
 function atualizarMapa() {
   const chave    = chaveSessao()
   const ocupadas = ocupadasDaSessao(chave)
+  const total    = totalCadeiras()
   let ocupadasCount = 0
 
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= total; i++) {
     const btn = document.getElementById(`cadeira-${i}`)
+    if (!btn) continue
     btn.classList.remove('ocupada', 'selecionada')
 
     if (ocupadas.has(i)) {
@@ -226,7 +248,7 @@ function atualizarMapa() {
   }
 
   document.getElementById('contador-mapa').textContent =
-    `${50 - ocupadasCount} livres · ${ocupadasCount} ocupadas`
+    `${total - ocupadasCount} livres · ${ocupadasCount} ocupadas`
 }
 
 function toggleSelecionada(numero) {
@@ -348,6 +370,7 @@ function abrirModal(dados) {
     <p><strong>Cliente:</strong> ${dados.nome}</p>
     <p><strong>Filme:</strong> ${dados.filme}</p>
     <p><strong>Data:</strong> ${dados.data} às ${dados.horario}</p>
+    <p><strong>Sala:</strong> ${dados.sala === '70' ? 'Sala 2' : 'Sala 1'} (${dados.sala} cadeiras)</p>
     <div class="comprovante-cadeiras">${cadeirasHtml}</div>
     <p style="margin-top:0.75rem"><strong>Total:</strong> ${dados.totalStr}</p>
   `
@@ -419,8 +442,9 @@ function salvarReservas() {
       filme:    celulas[1].innerText,
       data:     celulas[2].innerText,
       horario:  celulas[3].innerText,
-      cadeiras: JSON.parse(celulas[4].dataset.cadeiras),
-      total:    celulas[5].innerText,
+      sala:     celulas[4].innerText,
+      cadeiras: JSON.parse(celulas[5].dataset.cadeiras),
+      total:    celulas[6].innerText,
     })
   })
   localStorage.setItem('cinema-reservas', JSON.stringify(dados))
@@ -428,12 +452,12 @@ function salvarReservas() {
 
 function carregarReservas() {
   const dados = JSON.parse(localStorage.getItem('cinema-reservas') || '[]')
-  dados.forEach(r => inserirLinha(r.nome, r.filme, r.data, r.horario, r.cadeiras, r.total, false))
+  dados.forEach(r => inserirLinha(r.nome, r.filme, r.data, r.horario, r.sala || '35', r.cadeiras, r.total, false))
 }
 
 // ===== INSERIR LINHA =====
-function inserirLinha(nome, filme, data, horario, lista, totalStr, animar = true) {
-  const chave    = `${filme}|${data}|${horario}`
+function inserirLinha(nome, filme, data, horario, sala, lista, totalStr, animar = true) {
+  const chave    = `${filme}|${data}|${horario}|${sala}`
   const ocupadas = ocupadasDaSessao(chave)
   lista.forEach(c => ocupadas.add(c.numero))
 
@@ -442,15 +466,15 @@ function inserirLinha(nome, filme, data, horario, lista, totalStr, animar = true
     return `<div class="item-cadeira">Cadeira ${c.numero} — <span class="${cls}">${c.tipo}</span></div>`
   }).join('')
 
-  const linha = tabela.insertRow() // cria <tr></tr> no tbody
+  const linha = tabela.insertRow()
   if (animar) linha.classList.add('linha-nova')
 
-  // innerHTML com template literal — preenche todas as células de uma vez
   linha.innerHTML = `
     <td>${nome}</td>
     <td>${filme}</td>
     <td>${data}</td>
     <td>${horario}</td>
+    <td>Sala ${sala === '70' ? '2' : '1'} (${sala})</td>
     <td data-cadeiras='${JSON.stringify(lista)}'><div class="lista-cadeiras">${cadeirasHtml}</div></td>
     <td class="total-cell">${totalStr}</td>
     <td>
@@ -468,6 +492,7 @@ function cadastrar(evento) {
   const filme   = document.getElementById('filme').value
   const data    = dataHidden.value
   const horario = document.getElementById('horario').value
+  const sala    = document.getElementById('sala').value
 
   if (!nome || !filme || !data) {
     alert('Por favor, preencha todos os campos.')
@@ -480,12 +505,12 @@ function cadastrar(evento) {
   }
 
   // Valida nome duplicado na mesma sessão
-  const chave = `${filme}|${data}|${horario}`
+  const chave = `${filme}|${data}|${horario}|${sala}`
   const jaExiste = [...tabela.querySelectorAll('tr')].some(linha => {
     const celulas = linha.querySelectorAll('td')
     return celulas.length &&
       celulas[0].innerText.trim().toLowerCase() === nome.trim().toLowerCase() &&
-      `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}` === chave
+      `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}|${celulas[4].innerText.match(/\d+/)?.[0]}` === chave
   })
 
   if (jaExiste) {
@@ -501,11 +526,10 @@ function cadastrar(evento) {
   lista.forEach(c => { total += c.tipo === 'Inteira' ? PRECO_INTEIRA : PRECO_ESTUDANTE })
   const totalStr = `R$ ${total.toFixed(2).replace('.', ',')}`
 
-  inserirLinha(nome, filme, data, horario, lista, totalStr)
+  inserirLinha(nome, filme, data, horario, sala, lista, totalStr)
   salvarReservas()
 
-  // Abre modal comprovante
-  abrirModal({ nome, filme, data, horario, lista, totalStr })
+  abrirModal({ nome, filme, data, horario, sala, lista, totalStr })
 
   cadeirasSelecionadas.clear()
   document.getElementById('form-reserva').reset()
@@ -524,8 +548,9 @@ function excluir(elemento) {
 
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
-  const lista   = JSON.parse(celulas[4].dataset.cadeiras)
-  const chave   = `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}`
+  const lista   = JSON.parse(celulas[5].dataset.cadeiras)
+  const sala    = celulas[4].innerText.match(/\d+/)?.[0] || '35'
+  const chave   = `${celulas[1].innerText}|${celulas[2].innerText}|${celulas[3].innerText}|${sala}`
 
   lista.forEach(c => ocupadasDaSessao(chave).delete(c.numero))
   linha.remove()
@@ -537,22 +562,23 @@ function excluir(elemento) {
 function editar(elemento) {
   const linha   = elemento.parentElement.parentElement
   const celulas = linha.querySelectorAll('td')
-  const lista   = JSON.parse(celulas[4].dataset.cadeiras)
+  const lista   = JSON.parse(celulas[5].dataset.cadeiras)
   const filme   = celulas[1].innerText
   const data    = celulas[2].innerText
   const horario = celulas[3].innerText
-  const chave   = `${filme}|${data}|${horario}`
+  const sala    = celulas[4].innerText.match(/\d+/)?.[0] || '35'
+  const chave   = `${filme}|${data}|${horario}|${sala}`
 
   lista.forEach(c => ocupadasDaSessao(chave).delete(c.numero))
 
   document.getElementById('nome').value    = celulas[0].innerText
   document.getElementById('filme').value   = filme
-  // Restaura data no display e no hidden
   const partes = celulas[2].innerText.split('-')
   dataHidden.value  = celulas[2].innerText
   dataDisplay.value = `${partes[2]}/${partes[1]}/${partes[0]}`
   calSelecionado    = new Date(partes[0], parseInt(partes[1])-1, parseInt(partes[2]))
   document.getElementById('horario').value = horario
+  document.getElementById('sala').value    = sala
 
   lista.forEach(({ numero, tipo }) => {
     cadeirasSelecionadas.set(numero, tipo)
@@ -567,10 +593,13 @@ function editar(elemento) {
   document.getElementById('nome').focus()
 }
 
-// Atualiza mapa ao trocar sessão
-;['filme', 'data', 'horario'].forEach(id => {
+// Atualiza mapa ao trocar sessão ou sala
+;['filme', 'horario', 'sala'].forEach(id => {
   document.getElementById(id).addEventListener('change', atualizarMapa)
 })
+
+// Ao trocar sala reconstrói o mapa inteiro
+document.getElementById('sala').addEventListener('change', renderizarMapa)
 
 document.getElementById('btn-reservar').addEventListener('click', cadastrar)
 

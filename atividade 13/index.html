@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
@@ -45,6 +46,13 @@
       <input type="hidden" id="data" />
       <!-- Calendário customizado -->
       <div id="calendario" class="calendario hidden"></div>
+    </div>
+    <div class="form-group">
+      <label for="sala">Sala</label>
+      <select id="sala" required>
+        <option value="35">🎭 Sala 1 — 35 cadeiras</option>
+        <option value="70">🎭 Sala 2 — 70 cadeiras</option>
+      </select>
     </div>
     <div class="form-group">
       <label for="horario">Horário</label>
@@ -95,8 +103,9 @@
           <th data-col="1" class="sortable">Filme <span class="sort-icon">↕</span></th>
           <th data-col="2" class="sortable">Data <span class="sort-icon">↕</span></th>
           <th data-col="3">Horário</th>
-          <th data-col="4">Cadeiras</th>
-          <th data-col="5" class="sortable">Total <span class="sort-icon">↕</span></th>
+          <th data-col="4">Sala</th>
+          <th data-col="5">Cadeiras</th>
+          <th data-col="6" class="sortable">Total <span class="sort-icon">↕</span></th>
           <th>Ações</th>
         </tr>
       </thead>
