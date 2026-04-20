@@ -221,3 +221,7 @@ document.getElementById('data').addEventListener('keydown', (evento) => {
 
 // Inicializa o mapa
 gerarMapa()
+
+// Define a data mínima do input como hoje — impede datas passadas
+const inputData = document.getElementById('data')
+inputData.min = new Date().toISOString().split('T')[0]
