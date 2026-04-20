@@ -33,12 +33,26 @@
       <input type="date" id="data" required />
     </div>
 
-    <!-- Cada cadeira selecionada aparece aqui com seu próprio select de tipo -->
+    <div class="form-group">
+      <label for="horario">Horário</label>
+      <select id="horario" required>
+        <option value="14:00">🕑 14:00</option>
+        <option value="17:00">🕔 17:00</option>
+        <option value="20:00">🕗 20:00</option>
+      </select>
+    </div>
+
+    <!-- Cadeiras selecionadas com tipo e total -->
     <div class="form-group full-width">
-      <label>Cadeiras Selecionadas</label>
+      <label>Cadeiras Selecionadas <span id="contador-sel" class="contador-sel"></span></label>
       <div id="cadeiras-selecionadas" class="tags-box">
-        <span class="placeholder-tag">Clique nas cadeiras no mapa abaixo</span>
+        <span class="placeholder-tag">Clique nas cadeiras no mapa abaixo (máx. 6)</span>
       </div>
+    </div>
+
+    <div class="form-group full-width total-box">
+      <span>Total estimado:</span>
+      <strong id="total-valor">R$ 0,00</strong>
     </div>
 
     <button type="button" class="btn-reservar" id="btn-reservar">Reservar</button>
@@ -47,12 +61,17 @@
   <!-- MAPA -->
   <div class="mapa-wrapper">
     <h2>🪑 Mapa de Cadeiras</h2>
-    <p class="legenda">
-      <span class="leg leg-livre"></span> Livre
-      <span class="leg leg-selecionada"></span> Selecionada
-      <span class="leg leg-ocupada"></span> Ocupada
-    </p>
+    <div class="mapa-info">
+      <p class="legenda">
+        <span class="leg leg-livre"></span> Livre
+        <span class="leg leg-selecionada"></span> Selecionada
+        <span class="leg leg-ocupada"></span> Ocupada
+      </p>
+      <p id="contador-mapa" class="contador-mapa">50 livres · 0 ocupadas</p>
+    </div>
     <div id="mapa-cadeiras"></div>
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip"></div>
   </div>
 
   <!-- TABELA -->
@@ -64,7 +83,9 @@
           <th>Cliente</th>
           <th>Filme</th>
           <th>Data</th>
+          <th>Horário</th>
           <th>Cadeiras</th>
+          <th>Total</th>
           <th>Ações</th>
         </tr>
       </thead>

@@ -26,7 +26,7 @@ form {
 }
 
 .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
-.full-width { grid-column: 1 / -1; }
+.full-width  { grid-column: 1 / -1; }
 
 label {
   font-size: 0.82rem;
@@ -34,6 +34,12 @@ label {
   color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.contador-sel {
+  color: #f5c518;
+  font-size: 0.78rem;
+  margin-left: 0.4rem;
 }
 
 input, select {
@@ -46,8 +52,18 @@ input, select {
   outline: none;
   transition: border-color 0.2s;
 }
-
 input:focus, select:focus { border-color: #f5c518; }
+
+/* Total estimado */
+.total-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #aaa;
+  padding: 0.5rem 0;
+}
+.total-box strong { color: #f5c518; font-size: 1.1rem; }
 
 .btn-reservar {
   grid-column: 1 / -1;
@@ -78,7 +94,6 @@ input:focus, select:focus { border-color: #f5c518; }
 
 .placeholder-tag { color: #555; font-size: 0.88rem; }
 
-/* Cada tag agrupa número da cadeira + select de tipo + botão remover */
 .tag {
   display: flex;
   align-items: center;
@@ -118,6 +133,16 @@ input:focus, select:focus { border-color: #f5c518; }
   border-radius: 12px;
   padding: 1.5rem 2rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.mapa-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .legenda {
@@ -126,10 +151,14 @@ input:focus, select:focus { border-color: #f5c518; }
   gap: 1rem;
   font-size: 0.85rem;
   color: #aaa;
-  margin-bottom: 1rem;
 }
 
-.leg { display: inline-block; width: 20px; height: 20px; border-radius: 4px; }
+.contador-mapa {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.leg { display: inline-block; width: 18px; height: 18px; border-radius: 4px; }
 .leg-livre       { background: #2e7d32; }
 .leg-selecionada { background: #f5c518; }
 .leg-ocupada     { background: #c62828; }
@@ -164,10 +193,29 @@ input:focus, select:focus { border-color: #f5c518; }
   background: #2e7d32;
   color: #fff;
   transition: transform 0.1s;
+  position: relative;
 }
-.cadeira:hover         { transform: scale(1.1); }
+.cadeira:hover         { transform: scale(1.15); }
 .cadeira.selecionada   { background: #f5c518; color: #0d0d1a; }
 .cadeira.ocupada       { background: #c62828; cursor: not-allowed; }
+.cadeira.ocupada:hover { transform: none; }
+
+/* ===== TOOLTIP ===== */
+.tooltip {
+  position: fixed;
+  background: #22223a;
+  border: 1px solid #f5c518;
+  color: #eee;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.tooltip.visivel { opacity: 1; }
 
 /* ===== TABELA ===== */
 .table-wrapper {
@@ -189,12 +237,11 @@ th, td {
 
 tbody tr:hover { background: #22223a; }
 
-/* Lista de cadeiras dentro da célula */
 .lista-cadeiras { display: flex; flex-direction: column; gap: 0.2rem; }
-
-.item-cadeira { font-size: 0.82rem; }
-.tipo-inteira  { color: #f5c518; font-weight: 700; }
-.tipo-estudante{ color: #4fc3f7; font-weight: 700; }
+.item-cadeira   { font-size: 0.82rem; }
+.tipo-inteira   { color: #f5c518; font-weight: 700; }
+.tipo-estudante { color: #4fc3f7; font-weight: 700; }
+.total-cell     { color: #7ed321; font-weight: 700; }
 
 /* ===== BOTÕES DE AÇÃO ===== */
 .btn-editar, .btn-excluir {
