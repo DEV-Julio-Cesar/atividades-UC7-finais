@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cinema — Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body class="auth-body">
+
+  <button id="btn-tema" title="Alternar tema">🌙</button>
+
+  <div class="auth-card">
+    <h1>🎬 Cinema</h1>
+
+    <!-- ===== PAINEL LOGIN ===== -->
+    <div id="painel-login">
+      <h2>Entrar</h2>
+      <form id="form-login">
+        <div class="form-group">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" placeholder="seu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="login-senha">Senha</label>
+          <div class="input-senha">
+            <input type="password" id="login-senha" placeholder="Sua senha" required />
+            <button type="button" class="btn-ver" onclick="toggleSenha('login-senha', this)">👁️</button>
+          </div>
+        </div>
+        <p id="erro-login" class="msg-erro"></p>
+        <button type="submit" class="btn-auth">Entrar</button>
+      </form>
+      <p class="auth-link">
+        Não tem conta?
+        <a href="#" onclick="mostrarPainel('cadastro')">Criar conta</a>
+      </p>
+    </div>
+
+    <!-- ===== PAINEL CRIAR CONTA ===== -->
+    <div id="painel-cadastro" class="hidden">
+      <h2>Criar Conta</h2>
+      <form id="form-cadastro">
+        <div class="form-group">
+          <label for="cad-nome">Nome</label>
+          <input type="text" id="cad-nome" placeholder="Seu nome" required />
+        </div>
+        <div class="form-group">
+          <label for="cad-email">E-mail</label>
+          <input type="email" id="cad-email" placeholder="seu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="cad-senha">Senha</label>
+          <div class="input-senha">
+            <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" required />
+            <button type="button" class="btn-ver" onclick="toggleSenha('cad-senha', this)">👁️</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cad-confirma">Confirmar Senha</label>
+          <div class="input-senha">
+            <input type="password" id="cad-confirma" placeholder="Repita a senha" required />
+            <button type="button" class="btn-ver" onclick="toggleSenha('cad-confirma', this)">👁️</button>
+          </div>
+        </div>
+        <p id="erro-cadastro" class="msg-erro"></p>
+        <button type="submit" class="btn-auth">Criar Conta</button>
+      </form>
+      <p class="auth-link">
+        Já tem conta?
+        <a href="#" onclick="mostrarPainel('login')">Entrar</a>
+      </p>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>

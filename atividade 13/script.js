@@ -1,3 +1,142 @@
+// ===== CALENDÁRIO CUSTOMIZADO =====
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+               'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+
+let calAtual = new Date()   // mês/ano exibido no calendário
+let calSelecionado = null   // data selecionada (objeto Date)
+
+const calEl      = document.getElementById('calendario')
+const dataDisplay = document.getElementById('data-display')
+const dataHidden  = document.getElementById('data')
+
+// Abre/fecha o calendário ao clicar no input
+dataDisplay.addEventListener('click', (e) => {
+  e.stopPropagation()
+  calEl.classList.toggle('hidden')
+  if (!calEl.classList.contains('hidden')) renderCalendario()
+})
+
+// Fecha ao clicar fora
+document.addEventListener('click', (e) => {
+  if (!calEl.contains(e.target) && e.target !== dataDisplay) {
+    calEl.classList.add('hidden')
+  }
+})
+
+function renderCalendario() {
+  const hoje  = new Date()
+  hoje.setHours(0,0,0,0)
+
+  const ano = calAtual.getFullYear()
+  const mes = calAtual.getMonth()
+
+  // Limpa e monta o cabeçalho
+  calEl.innerHTML = `
+    <div class="cal-header">
+      <button class="cal-nav" id="cal-prev" type="button">‹</button>
+      <span>${MESES[mes]} ${ano}</span>
+      <button class="cal-nav" id="cal-next" type="button">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  `
+
+  document.getElementById('cal-prev').addEventListener('click', (e) => {
+    e.stopPropagation()
+    calAtual.setMonth(calAtual.getMonth() - 1)
+    renderCalendario()
+  })
+
+  document.getElementById('cal-next').addEventListener('click', (e) => {
+    e.stopPropagation()
+    calAtual.setMonth(calAtual.getMonth() + 1)
+    renderCalendario()
+  })
+
+  const grid = document.getElementById('cal-grid')
+
+  // Cabeçalho dos dias da semana
+  DIAS_SEMANA.forEach(d => {
+    const span = document.createElement('span')
+    span.classList.add('cal-dia-semana')
+    span.textContent = d
+    grid.appendChild(span)
+  })
+
+  // Dia da semana do primeiro dia do mês (0=Dom)
+  const primeiroDia = new Date(ano, mes, 1).getDay()
+  // Total de dias no mês
+  const totalDias  = new Date(ano, mes + 1, 0).getDate()
+
+  // Células vazias antes do dia 1
+  for (let i = 0; i < primeiroDia; i++) {
+    const vazio = document.createElement('button')
+    vazio.classList.add('cal-dia', 'cal-vazio')
+    vazio.type = 'button'
+    grid.appendChild(vazio)
+  }
+
+  // Dias do mês
+  for (let dia = 1; dia <= totalDias; dia++) {
+    const btn  = document.createElement('button')
+    btn.type   = 'button'
+    btn.classList.add('cal-dia')
+    btn.textContent = dia
+
+    const dataBtn = new Date(ano, mes, dia)
+    dataBtn.setHours(0,0,0,0)
+
+    if (dataBtn < hoje) {
+      // Dia passado — desabilitado
+      btn.classList.add('cal-passado')
+    } else {
+      if (dataBtn.getTime() === hoje.getTime()) btn.classList.add('cal-hoje')
+
+      if (calSelecionado && dataBtn.getTime() === calSelecionado.getTime()) {
+        btn.classList.add('cal-selecionado')
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        calSelecionado = dataBtn
+
+        // Formata para exibição (DD/MM/AAAA)
+        const dd = String(dia).padStart(2,'0')
+        const mm = String(mes + 1).padStart(2,'0')
+        dataDisplay.value = `${dd}/${mm}/${ano}`
+
+        // Valor real no formato YYYY-MM-DD para o script
+        dataHidden.value = `${ano}-${mm}-${dd}`
+
+        // Dispara change para atualizar o mapa de cadeiras
+        dataHidden.dispatchEvent(new Event('change'))
+
+        calEl.classList.add('hidden')
+      })
+    }
+
+    grid.appendChild(btn)
+  }
+}
+
+// ===== PROTEÇÃO DE ROTA =====
+// Se não houver sessão ativa, redireciona para o login
+const sessao = JSON.parse(localStorage.getItem('cinema-sessao') || 'null')
+if (!sessao) {
+  window.location.href = 'login.html'
+}
+
+// Exibe o nome do usuário logado
+document.getElementById('user-nome').textContent = `👤 ${sessao ? sessao.nome : ''}`
+
+// Logout — remove a sessão e volta para o login
+document.getElementById('btn-logout').addEventListener('click', () => {
+  if (confirm('Deseja sair?')) {
+    localStorage.removeItem('cinema-sessao')
+    window.location.href = 'login.html'
+  }
+})
+
 // ===== CONSTANTES =====
 const PRECO_INTEIRA   = 30
 const PRECO_ESTUDANTE = 15
@@ -325,7 +464,7 @@ function cadastrar(evento) {
 
   const nome    = document.getElementById('nome').value
   const filme   = document.getElementById('filme').value
-  const data    = document.getElementById('data').value
+  const data    = dataHidden.value
   const horario = document.getElementById('horario').value
 
   if (!nome || !filme || !data) {
@@ -368,7 +507,9 @@ function cadastrar(evento) {
 
   cadeirasSelecionadas.clear()
   document.getElementById('form-reserva').reset()
-  document.getElementById('data').min = new Date().toISOString().split('T')[0]
+  dataDisplay.value = ''
+  dataHidden.value  = ''
+  calSelecionado    = null
   atualizarTags()
   atualizarTotal()
   atualizarMapa()
@@ -404,7 +545,11 @@ function editar(elemento) {
 
   document.getElementById('nome').value    = celulas[0].innerText
   document.getElementById('filme').value   = filme
-  document.getElementById('data').value    = data
+  // Restaura data no display e no hidden
+  const partes = celulas[2].innerText.split('-')
+  dataHidden.value  = celulas[2].innerText
+  dataDisplay.value = `${partes[2]}/${partes[1]}/${partes[0]}`
+  calSelecionado    = new Date(partes[0], parseInt(partes[1])-1, parseInt(partes[2]))
   document.getElementById('horario').value = horario
 
   lista.forEach(({ numero, tipo }) => {
@@ -435,7 +580,6 @@ document.getElementById('data').addEventListener('keydown', (evento) => {
 const temaSalvo = localStorage.getItem('cinema-tema') || 'dark'
 aplicarTema(temaSalvo)
 
-document.getElementById('data').min = new Date().toISOString().split('T')[0]
 gerarMapa()
 carregarReservas()
 atualizarMapa()

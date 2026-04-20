@@ -46,6 +46,30 @@ body {
 h1 { text-align: center; color: var(--accent); font-size: 1.8rem; }
 h2 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.75rem; }
 
+/* ===== USER BAR ===== */
+.user-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+#user-nome { font-weight: 600; color: var(--accent); }
+
+#btn-logout {
+  padding: 0.3rem 0.8rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#btn-logout:hover { background: #e53935; color: #fff; border-color: #e53935; }
+
 /* ===== BOTÃO TEMA ===== */
 #btn-tema {
   position: fixed;
@@ -166,6 +190,97 @@ input:focus, select:focus { border-color: var(--accent); }
   line-height: 1;
   padding: 0;
 }
+
+/* ===== CALENDÁRIO CUSTOMIZADO ===== */
+.input-cal { cursor: pointer; }
+
+.calendario {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 300;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 280px;
+  box-shadow: 0 4px 20px var(--shadow);
+  user-select: none;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.cal-header span {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.cal-nav {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.cal-nav:hover { background: var(--surface2); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-dia-semana {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0.2rem 0;
+}
+
+.cal-dia {
+  text-align: center;
+  padding: 0.35rem 0;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  color: var(--text);
+}
+
+.cal-dia:hover:not(.cal-vazio):not(.cal-passado) {
+  background: var(--surface2);
+}
+
+.cal-dia.cal-hoje {
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.cal-dia.cal-selecionado {
+  background: var(--accent);
+  color: #0d0d1a;
+  font-weight: 700;
+}
+
+.cal-dia.cal-passado {
+  color: var(--border);
+  cursor: not-allowed;
+}
+
+.cal-dia.cal-vazio { cursor: default; }
 
 /* ===== MAPA ===== */
 .mapa-wrapper {

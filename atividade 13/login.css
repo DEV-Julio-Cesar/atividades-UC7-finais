@@ -1,0 +1,101 @@
+/* ===== PÁGINA DE AUTH ===== */
+.auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  gap: 0;
+}
+
+.auth-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 24px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.auth-card h1 {
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.auth-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Formulário dentro do card */
+.auth-card form {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Input com botão de ver senha */
+.input-senha {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.input-senha input { flex: 1; }
+
+.btn-ver {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text);
+  transition: background 0.2s;
+}
+.btn-ver:hover { background: var(--border); }
+
+/* Botão principal de auth */
+.btn-auth {
+  width: 100%;
+  padding: 0.65rem;
+  background: var(--accent);
+  color: #0d0d1a;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.25rem;
+}
+.btn-auth:hover { background: var(--accent-dk); }
+
+/* Mensagem de erro */
+.msg-erro {
+  color: #e53935;
+  font-size: 0.85rem;
+  min-height: 1.1rem;
+}
+
+/* Link de alternância */
+.auth-link {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.auth-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.auth-link a:hover { text-decoration: underline; }
+
+/* Oculta painel */
+.hidden { display: none !important; }

@@ -11,6 +11,12 @@
   <!-- Botão tema -->
   <button id="btn-tema" title="Alternar tema">🌙</button>
 
+  <!-- Header com usuário logado -->
+  <div class="user-bar">
+    <span id="user-nome"></span>
+    <button id="btn-logout">Sair</button>
+  </div>
+
   <h1>🎬 Cinema — Reserva de Ingressos</h1>
 
   <!-- ===== FORMULÁRIO ===== -->
@@ -30,9 +36,15 @@
         <option value="Alien: Romulus">Alien: Romulus</option>
       </select>
     </div>
-    <div class="form-group">
-      <label for="data">Data da Sessão</label>
-      <input type="date" id="data" required />
+    <div class="form-group" style="position:relative">
+      <label>Data da Sessão</label>
+      <!-- Campo exibido ao usuário — somente leitura, abre o calendário ao clicar -->
+      <input type="text" id="data-display" placeholder="Selecione uma data" readonly
+             class="input-cal" autocomplete="off" required />
+      <!-- Campo oculto que guarda o valor real no formato YYYY-MM-DD -->
+      <input type="hidden" id="data" />
+      <!-- Calendário customizado -->
+      <div id="calendario" class="calendario hidden"></div>
     </div>
     <div class="form-group">
       <label for="horario">Horário</label>
