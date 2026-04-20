@@ -6,7 +6,7 @@ const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 let calAtual = new Date()   // mês/ano exibido no calendário
 let calSelecionado = null   // data selecionada (objeto Date)
 
-const calEl      = document.getElementById('calendario')
+const calEl       = document.getElementById('calendario')
 const dataDisplay = document.getElementById('data-display')
 const dataHidden  = document.getElementById('data')
 
@@ -17,12 +17,17 @@ dataDisplay.addEventListener('click', (e) => {
   if (!calEl.classList.contains('hidden')) renderCalendario()
 })
 
-// Fecha ao clicar fora
+// Fecha ao clicar em qualquer lugar fora do calendário e do input
 document.addEventListener('click', (e) => {
-  if (!calEl.contains(e.target) && e.target !== dataDisplay) {
+  if (!calEl.classList.contains('hidden') &&
+      !calEl.contains(e.target) &&
+      e.target !== dataDisplay) {
     calEl.classList.add('hidden')
   }
 })
+
+// Impede que cliques dentro do calendário propaguem para o document
+calEl.addEventListener('click', (e) => e.stopPropagation())
 
 function renderCalendario() {
   const hoje  = new Date()
@@ -42,13 +47,11 @@ function renderCalendario() {
   `
 
   document.getElementById('cal-prev').addEventListener('click', (e) => {
-    e.stopPropagation()
     calAtual.setMonth(calAtual.getMonth() - 1)
     renderCalendario()
   })
 
   document.getElementById('cal-next').addEventListener('click', (e) => {
-    e.stopPropagation()
     calAtual.setMonth(calAtual.getMonth() + 1)
     renderCalendario()
   })
@@ -96,8 +99,7 @@ function renderCalendario() {
         btn.classList.add('cal-selecionado')
       }
 
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation()
+      btn.addEventListener('click', () => {
         calSelecionado = dataBtn
 
         // Formata para exibição (DD/MM/AAAA)
