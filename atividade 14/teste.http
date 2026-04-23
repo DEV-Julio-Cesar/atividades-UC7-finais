@@ -1,0 +1,21 @@
+### Buscar todos os estados
+GET https://servicodados.ibge.gov.br/api/v1/localidades/estados
+Accept: application/json
+
+###
+
+### Buscar municípios por UF (exemplo: SP)
+GET https://servicodados.ibge.gov.br/api/v1/localidades/estados/SP/municipios
+Accept: application/json
+
+###
+
+### Buscar municípios por UF (exemplo: RJ)
+GET https://servicodados.ibge.gov.br/api/v1/localidades/estados/RJ/municipios
+Accept: application/json
+
+###
+
+### Buscar municípios por UF (exemplo: MG)
+GET https://servicodados.ibge.gov.br/api/v1/localidades/estados/MG/municipios
+Accept: application/json

@@ -1,0 +1,187 @@
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== FUNDO ANIMADO COM GRADIENTE ===== */
+body {
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background-size: 400% 400%;
+  animation: gradiente 8s ease infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  gap: 2rem;
+  color: #fff;
+}
+
+/* Animação do fundo */
+@keyframes gradiente {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== TÍTULO ===== */
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  background: linear-gradient(90deg, #f7971e, #ffd200, #f7971e);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brilho 3s linear infinite;
+}
+
+@keyframes brilho {
+  to { background-position: 200% center; }
+}
+
+/* ===== CARD PRINCIPAL ===== */
+.card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== LABEL ===== */
+label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd200;
+}
+
+/* ===== INPUT ===== */
+input[type="text"] {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 210, 0, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]::placeholder { color: rgba(255,255,255,0.35); }
+
+input[type="text"]:focus {
+  border-color: #ffd200;
+  box-shadow: 0 0 12px rgba(255, 210, 0, 0.4);
+}
+
+/* ===== BOTÕES ===== */
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  flex: 1;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efeito de onda ao clicar */
+button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+button:active::after { opacity: 1; }
+button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+
+/* Botão 1 — gradiente laranja/amarelo */
+.btn-then {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  color: #1a1a2e;
+}
+
+/* Botão 2 — gradiente roxo/azul */
+.btn-async {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+}
+
+/* ===== LISTA DE MUNICÍPIOS ===== */
+#municipios {
+  width: 100%;
+  max-width: 480px;
+  max-height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-right: 0.25rem;
+}
+
+/* Scrollbar customizada */
+#municipios::-webkit-scrollbar { width: 6px; }
+#municipios::-webkit-scrollbar-track { background: transparent; }
+#municipios::-webkit-scrollbar-thumb { background: #ffd200; border-radius: 10px; }
+
+/* Cada item da lista */
+#municipios p {
+  background: rgba(255, 255, 255, 0.07);
+  border-left: 3px solid #ffd200;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  color: #eee;
+  animation: entrar 0.3s ease both;
+}
+
+/* Animação de entrada dos itens */
+@keyframes entrar {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Delay escalonado nos primeiros 20 itens */
+#municipios p:nth-child(1)  { animation-delay: 0.02s; }
+#municipios p:nth-child(2)  { animation-delay: 0.04s; }
+#municipios p:nth-child(3)  { animation-delay: 0.06s; }
+#municipios p:nth-child(4)  { animation-delay: 0.08s; }
+#municipios p:nth-child(5)  { animation-delay: 0.10s; }
+#municipios p:nth-child(6)  { animation-delay: 0.12s; }
+#municipios p:nth-child(7)  { animation-delay: 0.14s; }
+#municipios p:nth-child(8)  { animation-delay: 0.16s; }
+#municipios p:nth-child(9)  { animation-delay: 0.18s; }
+#municipios p:nth-child(10) { animation-delay: 0.20s; }
+
+#municipios p:hover {
+  background: rgba(255, 210, 0, 0.12);
+  border-left-color: #f7971e;
+  color: #fff;
+}
+
+/* ===== CONTADOR ===== */
+#contador {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  text-align: right;
+  width: 100%;
+  max-width: 480px;
+}
