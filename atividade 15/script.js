@@ -2,7 +2,7 @@
 // Dados:   https://www.omdbapi.com/?apikey=[yourkey]&
 // Posters: https://img.omdbapi.com/?apikey=[yourkey]&
 // Chave gratuita em: https://www.omdbapi.com/apikey.aspx
-const API_KEY  = 'SUA_CHAVE_AQUI'
+const API_KEY  = 'cd9e2b29'
 const BASE_URL = `https://www.omdbapi.com/?apikey=${API_KEY}`
 
 // Estado da paginação
