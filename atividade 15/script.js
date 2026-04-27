@@ -73,8 +73,11 @@ async function buscarFilmes(pagina = 1) {
   const btn = document.getElementById('btn-buscar')
   btn.disabled = true; btn.textContent = '...'
 
+  // Traduz o termo digitado para inglês antes de enviar para a OMDB
+  const termoEN = await traduzir(termo, 'pt')
+
   // Monta URL com parâmetros da documentação OMDB
-  let url = `${OMDB_URL}&s=${encodeURIComponent(termo)}&r=json&page=${pagina}`
+  let url = `${OMDB_URL}&s=${encodeURIComponent(termoEN)}&r=json&page=${pagina}`
   if (tipo) url += `&type=${tipo}`   // type: movie | series | episode
   if (ano)  url += `&y=${ano}`       // y: ano de lançamento
 
