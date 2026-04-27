@@ -39,6 +39,21 @@ function tr(dicionario, valor) {
   return dicionario[valor] || valor
 }
 
+// ===== TRADUÇÃO AUTOMÁTICA (Google Translate — sem chave) =====
+// sl=es (espanhol) → tl=pt (português)
+async function traduzir(texto, de = 'es') {
+  if (!texto || texto === 'N/A') return texto
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${de}&tl=pt&dt=t&q=${encodeURIComponent(texto)}`
+    const res  = await fetch(url)
+    const json = await res.json()
+    // A resposta é um array aninhado — junta todos os fragmentos traduzidos
+    return json[0].map(f => f[0]).join('')
+  } catch {
+    return texto // se falhar, retorna o original
+  }
+}
+
 // ===== BUSCA POR TÍTULO (parâmetro s=) — async/await =====
 async function buscarFilmes(pagina = 1) {
   const termo = document.getElementById('busca').value.trim()
@@ -118,8 +133,10 @@ function buscarDetalhesFilme(imdbID) {
   const enredo = document.getElementById('enredo').value  // short | full
   fetch(`${OMDB_URL}&i=${imdbID}&plot=${enredo}&r=json`)
     .then(r => r.json())
-    .then(d => {
+    .then(async d => {
       console.log(JSON.stringify(d))
+      // Traduz o enredo do inglês para português
+      const enredoPT = await traduzir(d.Plot, 'en')
       const poster = d.Poster && d.Poster !== 'N/A'
         ? `<img src="${d.Poster}" alt="${d.Title}" />`
         : `<div class="sem-poster" style="width:130px;height:195px;border-radius:8px">🎬</div>`
@@ -134,7 +151,7 @@ function buscarDetalhesFilme(imdbID) {
           <p><strong>Duração:</strong> ${d.Runtime}</p>
           <p><strong>País:</strong> ${d.Country}</p>
           <p><strong>Prêmios:</strong> ${d.Awards}</p>
-          <p style="margin-top:0.5rem">${d.Plot}</p>
+          <p style="margin-top:0.5rem">${enredoPT}</p>
         </div>
       `)
     })
@@ -300,15 +317,18 @@ function criarCardPlaneta(p, i) {
 function buscarDetalhesDB(secao, id) {
   fetch(`${DB_URL}/${secao}/${id}`)
     .then(r => r.json())
-    .then(d => {
+    .then(async d => {
       console.log(JSON.stringify(d))
-      if (secao === 'characters') mostrarModalPersonagem(d)
-      else mostrarModalPlaneta(d)
+      if (secao === 'characters') await mostrarModalPersonagem(d)
+      else await mostrarModalPlaneta(d)
     })
     .catch(e => console.log(`Erro detalhes DB: ${e}`))
 }
 
-function mostrarModalPersonagem(d) {
+async function mostrarModalPersonagem(d) {
+  // Traduz a descrição do espanhol para português
+  const descricao = await traduzir(d.description, 'es')
+
   const transfs = d.transformations && d.transformations.length > 0
     ? `<div class="transformacoes">${d.transformations.map(t =>
         `<div class="transf-item"><img src="${t.image}" alt="${t.name}" />${t.name}</div>`
@@ -325,14 +345,16 @@ function mostrarModalPersonagem(d) {
         <span class="tag">${tr(AFIL_PT, d.affiliation)}</span>
       </p>
       <p><span class="destaque">⚡ Ki:</span> ${d.ki} / Máx: ${d.maxKi}</p>
-      <p>${d.description}</p>
+      <p>${descricao}</p>
       ${d.originPlanet ? `<p><strong>Planeta de origem:</strong> ${d.originPlanet.name}</p>` : ''}
       ${transfs ? `<p><strong>Transformações:</strong></p>${transfs}` : ''}
     </div>
   `)
 }
 
-function mostrarModalPlaneta(d) {
+async function mostrarModalPlaneta(d) {
+  const descricao = await traduzir(d.description, 'es')
+
   const status = d.isDestroyed
     ? `<span style="color:#e50914">💥 Destruído</span>`
     : `<span style="color:#2ecc71">✅ Existente</span>`
@@ -346,7 +368,7 @@ function mostrarModalPlaneta(d) {
     <div class="modal-body">
       <h2>${d.name}</h2>
       <p>${status}</p>
-      <p>${d.description}</p>
+      <p>${descricao}</p>
       <p><strong>Personagens:</strong></p>
       <p>${personagens}</p>
     </div>
