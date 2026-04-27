@@ -15,44 +15,66 @@ body {
 
 h1 {
   font-size: 2rem;
-  background: linear-gradient(90deg, #e50914, #ff6b6b, #e50914);
-  background-size: 200% auto;
+  background: linear-gradient(90deg, #e50914, #f5c518, #00b4d8, #e50914);
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: brilho 3s linear infinite;
+  animation: brilho 4s linear infinite;
 }
 
-@keyframes brilho {
-  to { background-position: 200% center; }
+@keyframes brilho { to { background-position: 300% center; } }
+
+.hidden { display: none !important; }
+
+/* ===== ABAS ===== */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: #1a1a2e;
+  padding: 0.4rem;
+  border-radius: 12px;
 }
 
-/* ===== CARD DE BUSCA ===== */
+.tab {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #aaa;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab.ativa        { background: #e50914; color: #fff; }
+.tab:not(.ativa):hover { background: #22223a; color: #eee; }
+
+/* ===== SEÇÕES ===== */
+#aba-filmes, #aba-dragonball {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* ===== SEARCH CARD ===== */
 .search-card {
   background: #1a1a2e;
   border-radius: 14px;
   padding: 1.5rem;
   width: 100%;
-  max-width: 680px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.search-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
+.search-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  flex: 1;
-  min-width: 140px;
-}
-
+.field { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 130px; }
 .field-sm { max-width: 110px; }
 
 label {
@@ -63,9 +85,7 @@ label {
   letter-spacing: 0.05em;
 }
 
-input[type="text"],
-input[type="number"],
-select {
+input, select {
   padding: 0.55rem 0.8rem;
   border-radius: 8px;
   border: 2px solid #333;
@@ -75,10 +95,9 @@ select {
   outline: none;
   transition: border-color 0.2s;
 }
-
 input:focus, select:focus { border-color: #e50914; }
 
-#btn-buscar {
+button {
   padding: 0.55rem 1rem;
   background: #e50914;
   color: #fff;
@@ -90,26 +109,25 @@ input:focus, select:focus { border-color: #e50914; }
   transition: background 0.2s, transform 0.1s;
   white-space: nowrap;
 }
-#btn-buscar:hover   { background: #b20710; }
-#btn-buscar:active  { transform: scale(0.97); }
-#btn-buscar:disabled{ background: #555; cursor: not-allowed; }
+button:hover   { background: #b20710; }
+button:active  { transform: scale(0.97); }
+button:disabled{ background: #555; cursor: not-allowed; }
 
 /* ===== STATUS ===== */
-.status-bar { width: 100%; max-width: 680px; }
-#contador   { font-size: 0.85rem; color: #aaa; }
-.msg-erro   { color: #e50914; font-size: 0.88rem; min-height: 1rem; }
+.status-bar { width: 100%; }
+#contador, #db-contador { font-size: 0.85rem; color: #aaa; }
+.msg-erro { color: #e50914; font-size: 0.88rem; min-height: 1rem; }
 
 /* ===== GRID ===== */
-#filmes-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   gap: 1.25rem;
   width: 100%;
-  max-width: 960px;
 }
 
-/* ===== CARD ===== */
-.card-filme {
+/* ===== CARD FILME ===== */
+.card-filme, .card-db {
   background: #1a1a2e;
   border-radius: 12px;
   overflow: hidden;
@@ -119,17 +137,15 @@ input:focus, select:focus { border-color: #e50914; }
   cursor: pointer;
 }
 
-.card-filme:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 24px rgba(229,9,20,0.35);
-}
+.card-filme:hover { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(229,9,20,0.35); }
+.card-db:hover    { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(245,197,24,0.3); }
 
 @keyframes entrar {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.card-filme img {
+.card-filme img, .card-db img {
   width: 100%;
   aspect-ratio: 2/3;
   object-fit: cover;
@@ -146,81 +162,13 @@ input:focus, select:focus { border-color: #e50914; }
   font-size: 2.5rem;
 }
 
-.card-info {
-  padding: 0.6rem 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.card-titulo {
-  font-size: 0.83rem;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card-ano  { font-size: 0.75rem; color: #aaa; }
-.card-tipo { font-size: 0.72rem; color: #666; text-transform: capitalize; }
-
-/* ===== MODAL DETALHES ===== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-  padding: 1rem;
-}
-.modal-overlay.hidden { display: none; }
-
-.modal {
-  background: #1a1a2e;
-  border-radius: 14px;
-  padding: 1.5rem;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  display: flex;
-  gap: 1.25rem;
-  position: relative;
-}
-
-.modal img {
-  width: 120px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.modal-body { display: flex; flex-direction: column; gap: 0.4rem; }
-.modal-body h2 { font-size: 1.1rem; color: #fff; }
-.modal-body p  { font-size: 0.83rem; color: #bbb; line-height: 1.5; }
-.modal-body .destaque { color: #f5c518; font-weight: 700; }
-
-.btn-fechar-modal {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 1.3rem;
-  cursor: pointer;
-}
-.btn-fechar-modal:hover { color: #e50914; }
+.card-info { padding: 0.6rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.card-titulo { font-size: 0.83rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-sub    { font-size: 0.75rem; color: #aaa; }
+.card-badge  { font-size: 0.72rem; font-weight: 700; color: #f5c518; }
 
 /* ===== PAGINAÇÃO ===== */
-.paginacao {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+.paginacao { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width: 100%; }
 
 .btn-pag {
   padding: 0.4rem 0.9rem;
@@ -232,10 +180,72 @@ input:focus, select:focus { border-color: #e50914; }
   font-size: 0.85rem;
   transition: background 0.2s;
 }
-.btn-pag:hover    { background: #e50914; border-color: #e50914; }
-.btn-pag.ativa    { background: #e50914; border-color: #e50914; font-weight: 700; }
+.btn-pag:hover { background: #e50914; border-color: #e50914; }
+.btn-pag.ativa { background: #e50914; border-color: #e50914; font-weight: 700; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+.modal-overlay.hidden { display: none !important; }
+
+.modal {
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+#modal-corpo { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+#modal-corpo img { width: 130px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+
+.modal-body { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 180px; }
+.modal-body h2 { font-size: 1.1rem; color: #fff; }
+.modal-body p  { font-size: 0.83rem; color: #bbb; line-height: 1.6; }
+.modal-body .destaque { color: #f5c518; font-weight: 700; }
+.modal-body .tag {
+  display: inline-block;
+  background: #22223a;
+  border: 1px solid #f5c518;
+  color: #f5c518;
+  border-radius: 20px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 0.1rem;
+}
+
+.btn-fechar-modal {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-fechar-modal:hover { color: #e50914; background: none; }
+
+/* Transformações */
+.transformacoes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.transf-item { text-align: center; font-size: 0.72rem; color: #aaa; }
+.transf-item img { width: 60px; border-radius: 6px; display: block; margin-bottom: 0.2rem; }
 
 @media (max-width: 500px) {
-  .modal { flex-direction: column; }
-  .modal img { width: 100%; height: 200px; }
+  #modal-corpo { flex-direction: column; }
+  #modal-corpo img { width: 100%; height: 200px; object-fit: cover; }
 }

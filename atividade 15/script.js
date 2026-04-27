@@ -1,87 +1,70 @@
-// ===== OMDB API =====
-// Dados:   https://www.omdbapi.com/?apikey=[yourkey]&
-// Posters: https://img.omdbapi.com/?apikey=[yourkey]&
-// Chave gratuita em: https://www.omdbapi.com/apikey.aspx
+// ===================================================
+//  FILMES — OMDB API
+//  https://www.omdbapi.com/?apikey=[yourkey]&
+// ===================================================
 const API_KEY  = 'cd9e2b29'
-const BASE_URL = `https://www.omdbapi.com/?apikey=${API_KEY}`
+const OMDB_URL = `https://www.omdbapi.com/?apikey=${API_KEY}`
 
-// Estado da paginação
-let paginaAtual  = 1
-let totalPaginas = 1
-let termoBusca   = ''
-
-// Referências ao DOM
-const grid      = document.getElementById('filmes-grid')
-const contador  = document.getElementById('contador')
-const erroEl    = document.getElementById('erro')
-const btnBuscar = document.getElementById('btn-buscar')
+let paginaFilmes  = 1
+let totalFilmes   = 1
+let termoFilmes   = ''
 
 // ===== BUSCA POR TÍTULO (parâmetro s=) — async/await =====
-// Parâmetros usados: s, type, y, page, r=json
 async function buscarFilmes(pagina = 1) {
   const termo = document.getElementById('busca').value.trim()
-  const tipo  = document.getElementById('tipo').value   // movie | series | episode | ''
-  const ano   = document.getElementById('ano').value    // y= ano de lançamento
+  const tipo  = document.getElementById('tipo').value
+  const ano   = document.getElementById('ano').value
 
-  if (!termo) {
-    erroEl.textContent = 'Digite um título para buscar.'
-    return
-  }
+  if (!termo) { document.getElementById('erro').textContent = 'Digite um título.'; return }
 
-  termoBusca  = termo
-  paginaAtual = pagina
+  termoFilmes  = termo
+  paginaFilmes = pagina
 
-  grid.innerHTML       = ''
-  erroEl.textContent   = ''
-  contador.textContent = 'Buscando...'
-  btnBuscar.disabled   = true
-  btnBuscar.textContent = '...'
+  const grid = document.getElementById('filmes-grid')
+  grid.innerHTML = ''
+  document.getElementById('erro').textContent   = ''
+  document.getElementById('contador').textContent = 'Buscando...'
 
-  // Monta a URL com os parâmetros da documentação
-  let url = `${BASE_URL}&s=${encodeURIComponent(termo)}&r=json&page=${pagina}`
-  if (tipo) url += `&type=${tipo}`   // parâmetro type: movie | series | episode
-  if (ano)  url += `&y=${ano}`       // parâmetro y: ano de lançamento
+  const btn = document.getElementById('btn-buscar')
+  btn.disabled = true; btn.textContent = '...'
+
+  // Monta URL com parâmetros da documentação OMDB
+  let url = `${OMDB_URL}&s=${encodeURIComponent(termo)}&r=json&page=${pagina}`
+  if (tipo) url += `&type=${tipo}`   // type: movie | series | episode
+  if (ano)  url += `&y=${ano}`       // y: ano de lançamento
 
   try {
-    // Fetch com async/await — não bloqueia a execução
     const resposta = await fetch(url)
-    const dados    = await resposta.json() // .json() converte a resposta
-
-    // Depuração no console com JSON.stringify conforme requisito
-    console.log(JSON.stringify(dados))
+    const dados    = await resposta.json()   // .json() converte a resposta
+    console.log(JSON.stringify(dados))       // depuração conforme requisito
 
     if (dados.Response === 'False') {
-      erroEl.textContent   = dados.Error || 'Nenhum resultado encontrado.'
-      contador.textContent = ''
-      renderizarPaginacao(0)
-      return
+      document.getElementById('erro').textContent    = dados.Error
+      document.getElementById('contador').textContent = ''
+      renderPaginacaoFilmes(0); return
     }
 
-    const total = parseInt(dados.totalResults) // totalResults retornado no nível raiz
-    totalPaginas = Math.ceil(total / 10)       // OMDB retorna 10 por página
+    const total = parseInt(dados.totalResults)  // totalResults no nível raiz
+    totalFilmes = Math.ceil(total / 10)
 
-    contador.textContent = `${total} resultado(s) — página ${pagina} de ${totalPaginas}`
+    document.getElementById('contador').textContent =
+      `${total} resultado(s) — página ${pagina} de ${totalFilmes}`
 
-    // Renderiza os cards
-    dados.Search.forEach((filme, i) => grid.appendChild(criarCard(filme, i)))
-
-    renderizarPaginacao(total)
+    dados.Search.forEach((f, i) => grid.appendChild(criarCardFilme(f, i)))
+    renderPaginacaoFilmes(total)
 
   } catch (erro) {
-    // try/catch trata erros de conexão
-    erroEl.textContent = `Erro de conexão: ${erro.message}`
-    console.log(`Erro: ${erro}`)
+    document.getElementById('erro').textContent = `Erro: ${erro.message}`
   } finally {
-    btnBuscar.disabled    = false
-    btnBuscar.textContent = '🔍 Buscar'
+    btn.disabled = false; btn.textContent = '🔍 Buscar'
   }
 }
 
-// ===== CRIAR CARD =====
-function criarCard(filme, indice) {
+// ===== CARD FILME =====
+function criarCardFilme(filme, i) {
   const card = document.createElement('div')
   card.classList.add('card-filme')
-  card.style.animationDelay = `${indice * 0.04}s`
+  card.style.animationDelay = `${i * 0.04}s`
 
   const poster = filme.Poster && filme.Poster !== 'N/A'
     ? `<img src="${filme.Poster}" alt="${filme.Title}" loading="lazy" />`
@@ -91,108 +74,310 @@ function criarCard(filme, indice) {
     ${poster}
     <div class="card-info">
       <div class="card-titulo" title="${filme.Title}">${filme.Title}</div>
-      <div class="card-ano">${filme.Year}</div>
-      <div class="card-tipo">${filme.Type}</div>
+      <div class="card-sub">${filme.Year}</div>
+      <div class="card-badge">${filme.Type}</div>
     </div>
   `
-
-  // Clique no card busca detalhes pelo imdbID (parâmetro i=)
-  card.addEventListener('click', () => buscarDetalhes(filme.imdbID))
-
+  // Clique busca detalhes pelo imdbID (parâmetro i=) usando .then()/.catch()
+  card.addEventListener('click', () => buscarDetalhesFilme(filme.imdbID))
   return card
 }
 
-// ===== DETALHES POR ID (parâmetro i=) — .then() / .catch() =====
-// Demonstra Promises encadeadas conforme requisito
-function buscarDetalhes(imdbID) {
-  const enredo = document.getElementById('enredo').value // short | full
+// ===== DETALHES FILME (parâmetro i=) — .then() / .catch() =====
+function buscarDetalhesFilme(imdbID) {
+  const enredo = document.getElementById('enredo').value  // short | full
+  fetch(`${OMDB_URL}&i=${imdbID}&plot=${enredo}&r=json`)
+    .then(r => r.json())
+    .then(d => {
+      console.log(JSON.stringify(d))
+      const poster = d.Poster && d.Poster !== 'N/A'
+        ? `<img src="${d.Poster}" alt="${d.Title}" />`
+        : `<div class="sem-poster" style="width:130px;height:195px;border-radius:8px">🎬</div>`
 
-  // Parâmetros: i= (imdbID), plot= (enredo), r=json
-  fetch(`${BASE_URL}&i=${imdbID}&plot=${enredo}&r=json`)
-    .then(resposta => resposta.json())
-    .then(dados => {
-      console.log(JSON.stringify(dados))
-      abrirModal(dados)
+      abrirModal(`
+        ${poster}
+        <div class="modal-body">
+          <h2>${d.Title} (${d.Year})</h2>
+          <p><span class="destaque">⭐ ${d.imdbRating}</span> — ${d.Genre}</p>
+          <p><strong>Diretor:</strong> ${d.Director}</p>
+          <p><strong>Elenco:</strong> ${d.Actors}</p>
+          <p><strong>Duração:</strong> ${d.Runtime}</p>
+          <p style="margin-top:0.5rem">${d.Plot}</p>
+        </div>
+      `)
     })
-    .catch(erro => {
-      console.log(`Erro ao buscar detalhes: ${erro}`)
-    })
+    .catch(e => console.log(`Erro detalhes: ${e}`))
 }
 
-// ===== MODAL DE DETALHES =====
-function abrirModal(dados) {
-  const overlay = document.getElementById('modal-overlay')
-  const corpo   = document.getElementById('modal-corpo')
-
-  const poster = dados.Poster && dados.Poster !== 'N/A'
-    ? `<img src="${dados.Poster}" alt="${dados.Title}" />`
-    : `<div class="sem-poster" style="width:120px;height:180px;border-radius:8px">🎬</div>`
-
-  corpo.innerHTML = `
-    ${poster}
-    <div class="modal-body">
-      <h2>${dados.Title} (${dados.Year})</h2>
-      <p><span class="destaque">⭐ ${dados.imdbRating}</span> — ${dados.Genre}</p>
-      <p><strong>Diretor:</strong> ${dados.Director}</p>
-      <p><strong>Elenco:</strong> ${dados.Actors}</p>
-      <p><strong>Duração:</strong> ${dados.Runtime}</p>
-      <p style="margin-top:0.5rem">${dados.Plot}</p>
-    </div>
-  `
-
-  overlay.classList.remove('hidden')
-}
-
-// ===== PAGINAÇÃO =====
-function renderizarPaginacao(total) {
-  const pag = document.getElementById('paginacao')
+// ===== PAGINAÇÃO FILMES =====
+function renderPaginacaoFilmes(total) {
+  const pag = document.getElementById('paginacao-filmes')
   pag.innerHTML = ''
   if (total <= 10) return
 
-  // Botão anterior
-  if (paginaAtual > 1) {
-    const btn = document.createElement('button')
-    btn.classList.add('btn-pag')
-    btn.textContent = '‹ Anterior'
-    btn.addEventListener('click', () => buscarFilmes(paginaAtual - 1))
-    pag.appendChild(btn)
+  const botoes = [
+    { label: '‹ Anterior', p: paginaFilmes - 1, show: paginaFilmes > 1 },
+    { label: 'Próximo ›',  p: paginaFilmes + 1, show: paginaFilmes < totalFilmes },
+  ]
+
+  if (botoes[0].show) { const b = criarBtnPag(botoes[0].label, () => buscarFilmes(botoes[0].p)); pag.appendChild(b) }
+
+  const ini = Math.max(1, paginaFilmes - 2)
+  const fim = Math.min(totalFilmes, paginaFilmes + 2)
+  for (let p = ini; p <= fim; p++) {
+    const b = criarBtnPag(p, () => buscarFilmes(p))
+    if (p === paginaFilmes) b.classList.add('ativa')
+    pag.appendChild(b)
   }
 
-  // Páginas numeradas (máx 5 ao redor da atual)
-  const inicio = Math.max(1, paginaAtual - 2)
-  const fim    = Math.min(totalPaginas, paginaAtual + 2)
+  if (botoes[1].show) { const b = criarBtnPag(botoes[1].label, () => buscarFilmes(botoes[1].p)); pag.appendChild(b) }
+}
 
-  for (let p = inicio; p <= fim; p++) {
-    const btn = document.createElement('button')
-    btn.classList.add('btn-pag')
-    if (p === paginaAtual) btn.classList.add('ativa')
-    btn.textContent = p
-    btn.addEventListener('click', () => buscarFilmes(p))
-    pag.appendChild(btn)
+// ===================================================
+//  DRAGON BALL API
+//  https://www.dragonball-api.com/api
+// ===================================================
+const DB_URL = 'https://dragonball-api.com/api'
+
+let dbLinks = {}   // guarda os links de navegação retornados pela API
+
+// Alterna filtros visíveis conforme a seção escolhida
+function trocarSecaoDB() {
+  const secao = document.getElementById('db-secao').value
+  const isChar = secao === 'characters'
+  document.getElementById('db-filtro-raca').classList.toggle('hidden', !isChar)
+  document.getElementById('db-filtro-afiliacao').classList.toggle('hidden', !isChar)
+  document.getElementById('db-filtro-destruido').classList.toggle('hidden', isChar)
+  document.getElementById('db-grid').innerHTML = ''
+  document.getElementById('paginacao-db').innerHTML = ''
+  document.getElementById('db-contador').textContent = ''
+}
+
+// ===== BUSCA DB (async/await) =====
+async function buscarDB(pagina = 1, urlDireta = null) {
+  const secao = document.getElementById('db-secao').value
+  const grid  = document.getElementById('db-grid')
+  grid.innerHTML = ''
+  document.getElementById('db-erro').textContent    = ''
+  document.getElementById('db-contador').textContent = 'Buscando...'
+
+  // Monta URL com filtros ou usa urlDireta (links de paginação)
+  let url = urlDireta || `${DB_URL}/${secao}?page=${pagina}&limit=12`
+
+  if (!urlDireta) {
+    if (secao === 'characters') {
+      const raca  = document.getElementById('db-raca').value
+      const afil  = document.getElementById('db-afiliacao').value
+      // Filtros não têm paginação conforme documentação
+      if (raca || afil) {
+        url = `${DB_URL}/characters?`
+        if (raca) url += `race=${encodeURIComponent(raca)}&`
+        if (afil) url += `affiliation=${encodeURIComponent(afil)}`
+      }
+    } else {
+      const dest = document.getElementById('db-destruido').value
+      if (dest !== '') url = `${DB_URL}/planets?isDestroyed=${dest}`
+    }
   }
 
-  // Botão próximo
-  if (paginaAtual < totalPaginas) {
-    const btn = document.createElement('button')
-    btn.classList.add('btn-pag')
-    btn.textContent = 'Próximo ›'
-    btn.addEventListener('click', () => buscarFilmes(paginaAtual + 1))
-    pag.appendChild(btn)
+  try {
+    const resposta = await fetch(url)
+    const dados    = await resposta.json()
+    console.log(JSON.stringify(dados))
+
+    // Resposta com paginação tem .items e .meta
+    const itens = Array.isArray(dados) ? dados : dados.items
+    const meta  = dados.meta  || null
+    dbLinks     = dados.links || {}
+
+    if (!itens || itens.length === 0) {
+      document.getElementById('db-erro').textContent    = 'Nenhum resultado encontrado.'
+      document.getElementById('db-contador').textContent = ''
+      return
+    }
+
+    const total = meta ? meta.totalItems : itens.length
+    const pAtual = meta ? meta.currentPage : 1
+    const pTotal = meta ? meta.totalPages  : 1
+    document.getElementById('db-contador').textContent =
+      `${total} resultado(s)${meta ? ` — página ${pAtual} de ${pTotal}` : ''}`
+
+    itens.forEach((item, i) => {
+      const card = secao === 'characters' ? criarCardPersonagem(item, i) : criarCardPlaneta(item, i)
+      grid.appendChild(card)
+    })
+
+    // Paginação usando os links retornados pela API
+    if (meta && meta.totalPages > 1) renderPaginacaoDB(meta)
+
+  } catch (erro) {
+    document.getElementById('db-erro').textContent = `Erro: ${erro.message}`
+    console.log(`Erro DB: ${erro}`)
   }
+}
+
+// ===== CARD PERSONAGEM =====
+function criarCardPersonagem(p, i) {
+  const card = document.createElement('div')
+  card.classList.add('card-db')
+  card.style.animationDelay = `${i * 0.04}s`
+
+  const img = p.image
+    ? `<img src="${p.image}" alt="${p.name}" loading="lazy" />`
+    : `<div class="sem-poster">👤</div>`
+
+  card.innerHTML = `
+    ${img}
+    <div class="card-info">
+      <div class="card-titulo">${p.name}</div>
+      <div class="card-sub">${p.race} — ${p.gender}</div>
+      <div class="card-badge">⚡ Ki: ${p.ki}</div>
+    </div>
+  `
+  // Clique busca detalhes do personagem (parâmetro /characters/{id})
+  card.addEventListener('click', () => buscarDetalhesDB('characters', p.id))
+  return card
+}
+
+// ===== CARD PLANETA =====
+function criarCardPlaneta(p, i) {
+  const card = document.createElement('div')
+  card.classList.add('card-db')
+  card.style.animationDelay = `${i * 0.04}s`
+
+  const img = p.image
+    ? `<img src="${p.image}" alt="${p.name}" loading="lazy" />`
+    : `<div class="sem-poster">🌍</div>`
+
+  const status = p.isDestroyed
+    ? `<span style="color:#e50914">💥 Destruído</span>`
+    : `<span style="color:#2ecc71">✅ Existente</span>`
+
+  card.innerHTML = `
+    ${img}
+    <div class="card-info">
+      <div class="card-titulo">${p.name}</div>
+      <div class="card-sub">${status}</div>
+    </div>
+  `
+  card.addEventListener('click', () => buscarDetalhesDB('planets', p.id))
+  return card
+}
+
+// ===== DETALHES DB — .then() / .catch() =====
+function buscarDetalhesDB(secao, id) {
+  fetch(`${DB_URL}/${secao}/${id}`)
+    .then(r => r.json())
+    .then(d => {
+      console.log(JSON.stringify(d))
+      if (secao === 'characters') mostrarModalPersonagem(d)
+      else mostrarModalPlaneta(d)
+    })
+    .catch(e => console.log(`Erro detalhes DB: ${e}`))
+}
+
+function mostrarModalPersonagem(d) {
+  const transfs = d.transformations && d.transformations.length > 0
+    ? `<div class="transformacoes">${d.transformations.map(t =>
+        `<div class="transf-item"><img src="${t.image}" alt="${t.name}" />${t.name}</div>`
+      ).join('')}</div>`
+    : ''
+
+  abrirModal(`
+    <img src="${d.image}" alt="${d.name}" />
+    <div class="modal-body">
+      <h2>${d.name}</h2>
+      <p>
+        <span class="tag">${d.race}</span>
+        <span class="tag">${d.gender}</span>
+        <span class="tag">${d.affiliation}</span>
+      </p>
+      <p><span class="destaque">⚡ Ki:</span> ${d.ki} / Max: ${d.maxKi}</p>
+      <p>${d.description}</p>
+      ${d.originPlanet ? `<p><strong>Planeta de origem:</strong> ${d.originPlanet.name}</p>` : ''}
+      ${transfs ? `<p><strong>Transformações:</strong></p>${transfs}` : ''}
+    </div>
+  `)
+}
+
+function mostrarModalPlaneta(d) {
+  const status = d.isDestroyed
+    ? `<span style="color:#e50914">💥 Destruído</span>`
+    : `<span style="color:#2ecc71">✅ Existente</span>`
+
+  const personagens = d.characters && d.characters.length > 0
+    ? d.characters.map(c => `<span class="tag">${c.name}</span>`).join('')
+    : 'Nenhum personagem associado'
+
+  abrirModal(`
+    <img src="${d.image}" alt="${d.name}" />
+    <div class="modal-body">
+      <h2>${d.name}</h2>
+      <p>${status}</p>
+      <p>${d.description}</p>
+      <p><strong>Personagens:</strong></p>
+      <p>${personagens}</p>
+    </div>
+  `)
+}
+
+// ===== PAGINAÇÃO DB (usando links da API) =====
+function renderPaginacaoDB(meta) {
+  const pag = document.getElementById('paginacao-db')
+  pag.innerHTML = ''
+
+  // Usa os links retornados pela API conforme documentação
+  if (dbLinks.first)    pag.appendChild(criarBtnPag('« Primeiro', () => buscarDB(1, dbLinks.first)))
+  if (dbLinks.previous) pag.appendChild(criarBtnPag('‹ Anterior', () => buscarDB(1, dbLinks.previous)))
+
+  const ini = Math.max(1, meta.currentPage - 2)
+  const fim = Math.min(meta.totalPages, meta.currentPage + 2)
+  for (let p = ini; p <= fim; p++) {
+    const b = criarBtnPag(p, () => buscarDB(p))
+    if (p === meta.currentPage) b.classList.add('ativa')
+    pag.appendChild(b)
+  }
+
+  if (dbLinks.next) pag.appendChild(criarBtnPag('Próximo ›', () => buscarDB(1, dbLinks.next)))
+  if (dbLinks.last) pag.appendChild(criarBtnPag('Último »',  () => buscarDB(1, dbLinks.last)))
+}
+
+// ===== HELPERS =====
+function criarBtnPag(label, fn) {
+  const b = document.createElement('button')
+  b.classList.add('btn-pag')
+  b.textContent = label
+  b.addEventListener('click', fn)
+  return b
+}
+
+function abrirModal(html) {
+  document.getElementById('modal-corpo').innerHTML = html
+  document.getElementById('modal-overlay').classList.remove('hidden')
+}
+
+// ===== TROCAR ABA =====
+function trocarAba(aba) {
+  document.getElementById('aba-filmes').classList.toggle('hidden', aba !== 'filmes')
+  document.getElementById('aba-dragonball').classList.toggle('hidden', aba !== 'dragonball')
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('ativa', (i === 0 && aba === 'filmes') || (i === 1 && aba === 'dragonball'))
+  })
 }
 
 // ===== FECHAR MODAL =====
 document.getElementById('btn-fechar-modal').addEventListener('click', () => {
   document.getElementById('modal-overlay').classList.add('hidden')
 })
-
 document.getElementById('modal-overlay').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('modal-overlay')) {
+  if (e.target === document.getElementById('modal-overlay'))
     document.getElementById('modal-overlay').classList.add('hidden')
-  }
 })
 
-// Enter no campo de busca
-document.getElementById('busca').addEventListener('keydown', (evento) => {
-  if (evento.key === 'Enter') buscarFilmes(1)
+// Enter na busca de filmes
+document.getElementById('busca').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') buscarFilmes(1)
 })
+
+// Carrega personagens Dragon Ball ao abrir a aba
+buscarDB(1)
