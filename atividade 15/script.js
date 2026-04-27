@@ -54,6 +54,77 @@ async function traduzir(texto, de = 'es') {
   }
 }
 
+// ===== TRADUÇÃO PT → EN (para busca na OMDB) =====
+// Dicionário de títulos famosos como fallback quando o Google não traduz
+const TITULOS_EN = {
+  'o senhor dos anéis': 'the lord of the rings',
+  'senhor dos anéis': 'lord of the rings',
+  'a sociedade do anel': 'the fellowship of the ring',
+  'as duas torres': 'the two towers',
+  'o retorno do rei': 'the return of the king',
+  'guerra nas estrelas': 'star wars',
+  'a guerra das estrelas': 'star wars',
+  'vingadores': 'avengers',
+  'homem de ferro': 'iron man',
+  'homem aranha': 'spider-man',
+  'homem-aranha': 'spider-man',
+  'capitão américa': 'captain america',
+  'thor': 'thor',
+  'pantera negra': 'black panther',
+  'doutor estranho': 'doctor strange',
+  'guardiões da galáxia': 'guardians of the galaxy',
+  'velozes e furiosos': 'fast and furious',
+  'missão impossível': 'mission impossible',
+  'de volta para o futuro': 'back to the future',
+  'o poderoso chefão': 'the godfather',
+  'clube da luta': 'fight club',
+  'matrix': 'matrix',
+  'interestelar': 'interstellar',
+  'a origem': 'inception',
+  'coringa': 'joker',
+  'batman': 'batman',
+  'superman': 'superman',
+  'divertida mente': 'inside out',
+  'procurando nemo': 'finding nemo',
+  'procurando dory': 'finding dory',
+  'toy story': 'toy story',
+  'o rei leão': 'the lion king',
+  'a bela e a fera': 'beauty and the beast',
+  'frozen': 'frozen',
+  'moana': 'moana',
+  'encanto': 'encanto',
+  'duna': 'dune',
+  'alien': 'alien',
+  'predador': 'predator',
+  'exterminador do futuro': 'terminator',
+  'o exterminador do futuro': 'terminator',
+  'jurassic park': 'jurassic park',
+  'parque dos dinossauros': 'jurassic park',
+  'titanic': 'titanic',
+  'avatar': 'avatar',
+}
+
+async function traduzirParaEN(termo) {
+  const chave = termo.toLowerCase().trim()
+
+  // 1 — verifica no dicionário local primeiro
+  if (TITULOS_EN[chave]) return TITULOS_EN[chave]
+
+  // 2 — tenta Google Translate com sl=pt forçado
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=pt&tl=en&dt=t&q=${encodeURIComponent(termo)}`
+    const res  = await fetch(url)
+    const json = await res.json()
+    const traduzido = json[0].map(f => f[0]).join('').trim()
+
+    // Se a tradução for diferente do original, usa ela
+    if (traduzido.toLowerCase() !== chave) return traduzido
+  } catch { /* ignora */ }
+
+  // 3 — fallback: retorna o termo original
+  return termo
+}
+
 // ===== BUSCA POR TÍTULO (parâmetro s=) — async/await =====
 async function buscarFilmes(pagina = 1) {
   const termo = document.getElementById('busca').value.trim()
@@ -73,8 +144,9 @@ async function buscarFilmes(pagina = 1) {
   const btn = document.getElementById('btn-buscar')
   btn.disabled = true; btn.textContent = '...'
 
-  // Traduz o termo digitado para inglês antes de enviar para a OMDB
-  const termoEN = await traduzir(termo, 'pt')
+  // Traduz o termo PT→EN usando dicionário + Google Translate
+  const termoEN = await traduzirParaEN(termo)
+  console.log(`Termo original: "${termo}" → Traduzido: "${termoEN}"`)
 
   // Monta URL com parâmetros da documentação OMDB
   let url = `${OMDB_URL}&s=${encodeURIComponent(termoEN)}&r=json&page=${pagina}`
