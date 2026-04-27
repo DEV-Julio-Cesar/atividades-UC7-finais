@@ -9,6 +9,36 @@ let paginaFilmes  = 1
 let totalFilmes   = 1
 let termoFilmes   = ''
 
+// ===== DICIONÁRIOS DE TRADUÇÃO =====
+
+// Tipos de mídia OMDB
+const TIPO_PT = { movie: 'Filme', series: 'Série', episode: 'Episódio', game: 'Jogo' }
+
+// Raças Dragon Ball
+const RACA_PT = {
+  'Saiyan': 'Saiyajin', 'Human': 'Humano', 'Namekian': 'Namekuseijin',
+  'Majin': 'Majin', 'Frieza Race': 'Raça de Freeza', 'Android': 'Androide',
+  'Jiren Race': 'Raça de Jiren', 'God': 'Deus', 'Angel': 'Anjo',
+  'Evil': 'Maligno', 'Nucleico': 'Nucleico', 'Unknown': 'Desconhecido'
+}
+
+// Gênero Dragon Ball
+const GENERO_PT = { 'Male': 'Masculino', 'Female': 'Feminino', 'Unknown': 'Desconhecido' }
+
+// Afiliação Dragon Ball
+const AFIL_PT = {
+  'Z Fighter': 'Guerreiro Z', 'Red Ribbon Army': 'Exército Fita Vermelha',
+  'Namekian Warrior': 'Guerreiro Namekuseijin', 'Freelancer': 'Independente',
+  'Army of Frieza': 'Exército de Freeza', 'Pride Troopers': 'Soldados do Orgulho',
+  'Assistant of Vermoud': 'Assistente de Vermoud', 'God': 'Deus',
+  'Assistant of Beerus': 'Assistente de Beerus', 'Villain': 'Vilão', 'Other': 'Outro'
+}
+
+// Função auxiliar — retorna tradução ou o valor original se não encontrar
+function tr(dicionario, valor) {
+  return dicionario[valor] || valor
+}
+
 // ===== BUSCA POR TÍTULO (parâmetro s=) — async/await =====
 async function buscarFilmes(pagina = 1) {
   const termo = document.getElementById('busca').value.trim()
@@ -75,7 +105,7 @@ function criarCardFilme(filme, i) {
     <div class="card-info">
       <div class="card-titulo" title="${filme.Title}">${filme.Title}</div>
       <div class="card-sub">${filme.Year}</div>
-      <div class="card-badge">${filme.Type}</div>
+      <div class="card-badge">${tr(TIPO_PT, filme.Type)}</div>
     </div>
   `
   // Clique busca detalhes pelo imdbID (parâmetro i=) usando .then()/.catch()
@@ -102,6 +132,8 @@ function buscarDetalhesFilme(imdbID) {
           <p><strong>Diretor:</strong> ${d.Director}</p>
           <p><strong>Elenco:</strong> ${d.Actors}</p>
           <p><strong>Duração:</strong> ${d.Runtime}</p>
+          <p><strong>País:</strong> ${d.Country}</p>
+          <p><strong>Prêmios:</strong> ${d.Awards}</p>
           <p style="margin-top:0.5rem">${d.Plot}</p>
         </div>
       `)
@@ -230,7 +262,7 @@ function criarCardPersonagem(p, i) {
     ${img}
     <div class="card-info">
       <div class="card-titulo">${p.name}</div>
-      <div class="card-sub">${p.race} — ${p.gender}</div>
+      <div class="card-sub">${tr(RACA_PT, p.race)} — ${tr(GENERO_PT, p.gender)}</div>
       <div class="card-badge">⚡ Ki: ${p.ki}</div>
     </div>
   `
@@ -288,11 +320,11 @@ function mostrarModalPersonagem(d) {
     <div class="modal-body">
       <h2>${d.name}</h2>
       <p>
-        <span class="tag">${d.race}</span>
-        <span class="tag">${d.gender}</span>
-        <span class="tag">${d.affiliation}</span>
+        <span class="tag">${tr(RACA_PT, d.race)}</span>
+        <span class="tag">${tr(GENERO_PT, d.gender)}</span>
+        <span class="tag">${tr(AFIL_PT, d.affiliation)}</span>
       </p>
-      <p><span class="destaque">⚡ Ki:</span> ${d.ki} / Max: ${d.maxKi}</p>
+      <p><span class="destaque">⚡ Ki:</span> ${d.ki} / Máx: ${d.maxKi}</p>
       <p>${d.description}</p>
       ${d.originPlanet ? `<p><strong>Planeta de origem:</strong> ${d.originPlanet.name}</p>` : ''}
       ${transfs ? `<p><strong>Transformações:</strong></p>${transfs}` : ''}
