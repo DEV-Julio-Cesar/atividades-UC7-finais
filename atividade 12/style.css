@@ -132,3 +132,26 @@ tbody tr:hover {
 .btn-excluir:hover {
   opacity: 0.8;
 }
+
+/* ===== CEP ===== */
+.cep-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cep-group input { flex: 1; }
+
+#btn-cep {
+  padding: 0.5rem 0.9rem;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+#btn-cep:hover { background: #1b5e20; }
+#btn-cep:disabled { background: #aaa; cursor: not-allowed; }

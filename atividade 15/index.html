@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎬 Busca de Filmes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>🎬 Busca de Filmes</h1>
+
+  <div class="search-box">
+    <input type="text" id="busca" placeholder="Digite o nome do filme..." autocomplete="off" />
+    <button id="btn-buscar" onclick="buscarFilmes()">Buscar</button>
+  </div>
+
+  <p id="contador"></p>
+  <p id="erro" class="msg-erro"></p>
+
+  <div id="filmes-grid"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
