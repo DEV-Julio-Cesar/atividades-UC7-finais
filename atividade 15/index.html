@@ -3,22 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎬 Busca de Filmes</title>
+  <title>🎬 Busca de Filmes — OMDB</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <h1>🎬 Busca de Filmes</h1>
 
-  <div class="search-box">
-    <input type="text" id="busca" placeholder="Digite o nome do filme..." autocomplete="off" />
-    <button id="btn-buscar" onclick="buscarFilmes()">Buscar</button>
+  <!-- ===== FORMULÁRIO DE BUSCA ===== -->
+  <div class="search-card">
+
+    <!-- Linha 1: título + ano -->
+    <div class="search-row">
+      <div class="field">
+        <label for="busca">Título</label>
+        <input type="text" id="busca" placeholder="Ex: Batman, Matrix..." autocomplete="off" />
+      </div>
+      <div class="field field-sm">
+        <label for="ano">Ano</label>
+        <input type="number" id="ano" placeholder="Ex: 2023" min="1888" max="2099" />
+      </div>
+    </div>
+
+    <!-- Linha 2: tipo + enredo + botão -->
+    <div class="search-row">
+      <div class="field">
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+          <option value="">Todos</option>
+          <option value="movie">Filme</option>
+          <option value="series">Série</option>
+          <option value="episode">Episódio</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="enredo">Enredo (detalhes)</label>
+        <select id="enredo">
+          <option value="short">Curto</option>
+          <option value="full">Completo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button id="btn-buscar" onclick="buscarFilmes(1)">🔍 Buscar</button>
+      </div>
+    </div>
+
   </div>
 
-  <p id="contador"></p>
-  <p id="erro" class="msg-erro"></p>
+  <div class="status-bar">
+    <p id="contador"></p>
+    <p id="erro" class="msg-erro"></p>
+  </div>
 
+  <!-- Grid de resultados -->
   <div id="filmes-grid"></div>
+
+  <!-- Paginação -->
+  <div id="paginacao" class="paginacao"></div>
+
+  <!-- Modal de detalhes -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal" id="modal-corpo">
+      <button class="btn-fechar-modal" id="btn-fechar-modal">✕</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

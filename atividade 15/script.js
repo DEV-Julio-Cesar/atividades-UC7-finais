@@ -1,10 +1,14 @@
-// API: OMDB (Open Movie Database)
-// Dados:   http://www.omdbapi.com/?apikey=[yourkey]&
-// Posters: http://img.omdbapi.com/?apikey=[yourkey]&
-// Cadastre sua chave gratuita em: https://www.omdbapi.com/apikey.aspx
+// ===== OMDB API =====
+// Dados:   https://www.omdbapi.com/?apikey=[yourkey]&
+// Posters: https://img.omdbapi.com/?apikey=[yourkey]&
+// Chave gratuita em: https://www.omdbapi.com/apikey.aspx
 const API_KEY  = 'SUA_CHAVE_AQUI'
 const BASE_URL = `https://www.omdbapi.com/?apikey=${API_KEY}`
-const IMG_URL  = `https://img.omdbapi.com/?apikey=${API_KEY}`
+
+// Estado da paginação
+let paginaAtual  = 1
+let totalPaginas = 1
+let termoBusca   = ''
 
 // Referências ao DOM
 const grid      = document.getElementById('filmes-grid')
@@ -12,49 +16,64 @@ const contador  = document.getElementById('contador')
 const erroEl    = document.getElementById('erro')
 const btnBuscar = document.getElementById('btn-buscar')
 
-// ===== BUSCAR FILMES (async/await) =====
-async function buscarFilmes() {
+// ===== BUSCA POR TÍTULO (parâmetro s=) — async/await =====
+// Parâmetros usados: s, type, y, page, r=json
+async function buscarFilmes(pagina = 1) {
   const termo = document.getElementById('busca').value.trim()
+  const tipo  = document.getElementById('tipo').value   // movie | series | episode | ''
+  const ano   = document.getElementById('ano').value    // y= ano de lançamento
 
   if (!termo) {
-    erroEl.textContent = 'Digite o nome de um filme para buscar.'
+    erroEl.textContent = 'Digite um título para buscar.'
     return
   }
 
+  termoBusca  = termo
+  paginaAtual = pagina
+
   grid.innerHTML       = ''
-  contador.textContent = ''
   erroEl.textContent   = ''
+  contador.textContent = 'Buscando...'
   btnBuscar.disabled   = true
   btnBuscar.textContent = '...'
 
+  // Monta a URL com os parâmetros da documentação
+  let url = `${BASE_URL}&s=${encodeURIComponent(termo)}&r=json&page=${pagina}`
+  if (tipo) url += `&type=${tipo}`   // parâmetro type: movie | series | episode
+  if (ano)  url += `&y=${ano}`       // parâmetro y: ano de lançamento
+
   try {
     // Fetch com async/await — não bloqueia a execução
-    // OMDB: parâmetro s= para busca por título
-    const resposta = await fetch(`${BASE_URL}&s=${encodeURIComponent(termo)}&type=movie`)
-    const dados    = await resposta.json() // converte para JSON com .json()
+    const resposta = await fetch(url)
+    const dados    = await resposta.json() // .json() converte a resposta
 
-    // Depuração no console conforme requisito
+    // Depuração no console com JSON.stringify conforme requisito
     console.log(JSON.stringify(dados))
 
     if (dados.Response === 'False') {
-      erroEl.textContent = dados.Error || 'Nenhum filme encontrado.'
+      erroEl.textContent   = dados.Error || 'Nenhum resultado encontrado.'
+      contador.textContent = ''
+      renderizarPaginacao(0)
       return
     }
 
-    contador.textContent = `${dados.totalResults} filmes encontrados`
+    const total = parseInt(dados.totalResults) // totalResults retornado no nível raiz
+    totalPaginas = Math.ceil(total / 10)       // OMDB retorna 10 por página
 
-    // Renderiza cada filme como card
-    dados.Search.forEach((filme, i) => {
-      grid.appendChild(criarCard(filme, i))
-    })
+    contador.textContent = `${total} resultado(s) — página ${pagina} de ${totalPaginas}`
+
+    // Renderiza os cards
+    dados.Search.forEach((filme, i) => grid.appendChild(criarCard(filme, i)))
+
+    renderizarPaginacao(total)
 
   } catch (erro) {
     // try/catch trata erros de conexão
-    erroEl.textContent = `Erro ao buscar filmes: ${erro.message}`
+    erroEl.textContent = `Erro de conexão: ${erro.message}`
     console.log(`Erro: ${erro}`)
   } finally {
     btnBuscar.disabled    = false
-    btnBuscar.textContent = 'Buscar'
+    btnBuscar.textContent = '🔍 Buscar'
   }
 }
 
@@ -62,9 +81,8 @@ async function buscarFilmes() {
 function criarCard(filme, indice) {
   const card = document.createElement('div')
   card.classList.add('card-filme')
-  card.style.animationDelay = `${indice * 0.05}s`
+  card.style.animationDelay = `${indice * 0.04}s`
 
-  // OMDB retorna 'N/A' quando não há poster — usa placeholder
   const poster = filme.Poster && filme.Poster !== 'N/A'
     ? `<img src="${filme.Poster}" alt="${filme.Title}" loading="lazy" />`
     : `<div class="sem-poster">🎬</div>`
@@ -78,42 +96,103 @@ function criarCard(filme, indice) {
     </div>
   `
 
-  // Clique no card busca detalhes pelo imdbID usando .then()/.catch()
+  // Clique no card busca detalhes pelo imdbID (parâmetro i=)
   card.addEventListener('click', () => buscarDetalhes(filme.imdbID))
 
   return card
 }
 
-// ===== DETALHES DO FILME (.then / .catch) =====
+// ===== DETALHES POR ID (parâmetro i=) — .then() / .catch() =====
 // Demonstra Promises encadeadas conforme requisito
 function buscarDetalhes(imdbID) {
-  fetch(`${BASE_URL}&i=${imdbID}&plot=short`)
+  const enredo = document.getElementById('enredo').value // short | full
+
+  // Parâmetros: i= (imdbID), plot= (enredo), r=json
+  fetch(`${BASE_URL}&i=${imdbID}&plot=${enredo}&r=json`)
     .then(resposta => resposta.json())
     .then(dados => {
       console.log(JSON.stringify(dados))
-      alert(
-        `🎬 ${dados.Title} (${dados.Year})\n\n` +
-        `⭐ Nota: ${dados.imdbRating}\n` +
-        `🎭 Gênero: ${dados.Genre}\n` +
-        `🎬 Diretor: ${dados.Director}\n\n` +
-        `📖 ${dados.Plot}`
-      )
+      abrirModal(dados)
     })
-    .catch(erro => console.log(`Erro ao buscar detalhes: ${erro}`))
+    .catch(erro => {
+      console.log(`Erro ao buscar detalhes: ${erro}`)
+    })
 }
 
-// Busca ao pressionar Enter
-document.getElementById('busca').addEventListener('keydown', (evento) => {
-  if (evento.key === 'Enter') buscarFilmes()
+// ===== MODAL DE DETALHES =====
+function abrirModal(dados) {
+  const overlay = document.getElementById('modal-overlay')
+  const corpo   = document.getElementById('modal-corpo')
+
+  const poster = dados.Poster && dados.Poster !== 'N/A'
+    ? `<img src="${dados.Poster}" alt="${dados.Title}" />`
+    : `<div class="sem-poster" style="width:120px;height:180px;border-radius:8px">🎬</div>`
+
+  corpo.innerHTML = `
+    ${poster}
+    <div class="modal-body">
+      <h2>${dados.Title} (${dados.Year})</h2>
+      <p><span class="destaque">⭐ ${dados.imdbRating}</span> — ${dados.Genre}</p>
+      <p><strong>Diretor:</strong> ${dados.Director}</p>
+      <p><strong>Elenco:</strong> ${dados.Actors}</p>
+      <p><strong>Duração:</strong> ${dados.Runtime}</p>
+      <p style="margin-top:0.5rem">${dados.Plot}</p>
+    </div>
+  `
+
+  overlay.classList.remove('hidden')
+}
+
+// ===== PAGINAÇÃO =====
+function renderizarPaginacao(total) {
+  const pag = document.getElementById('paginacao')
+  pag.innerHTML = ''
+  if (total <= 10) return
+
+  // Botão anterior
+  if (paginaAtual > 1) {
+    const btn = document.createElement('button')
+    btn.classList.add('btn-pag')
+    btn.textContent = '‹ Anterior'
+    btn.addEventListener('click', () => buscarFilmes(paginaAtual - 1))
+    pag.appendChild(btn)
+  }
+
+  // Páginas numeradas (máx 5 ao redor da atual)
+  const inicio = Math.max(1, paginaAtual - 2)
+  const fim    = Math.min(totalPaginas, paginaAtual + 2)
+
+  for (let p = inicio; p <= fim; p++) {
+    const btn = document.createElement('button')
+    btn.classList.add('btn-pag')
+    if (p === paginaAtual) btn.classList.add('ativa')
+    btn.textContent = p
+    btn.addEventListener('click', () => buscarFilmes(p))
+    pag.appendChild(btn)
+  }
+
+  // Botão próximo
+  if (paginaAtual < totalPaginas) {
+    const btn = document.createElement('button')
+    btn.classList.add('btn-pag')
+    btn.textContent = 'Próximo ›'
+    btn.addEventListener('click', () => buscarFilmes(paginaAtual + 1))
+    pag.appendChild(btn)
+  }
+}
+
+// ===== FECHAR MODAL =====
+document.getElementById('btn-fechar-modal').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.add('hidden')
 })
 
-// Carrega filmes populares ao abrir usando .then()/.catch()
-fetch(`${BASE_URL}&s=marvel&type=movie`)
-  .then(resposta => resposta.json())
-  .then(dados => {
-    if (dados.Response === 'True') {
-      contador.textContent = 'Filmes em destaque — clique para ver detalhes'
-      dados.Search.forEach((filme, i) => grid.appendChild(criarCard(filme, i)))
-    }
-  })
-  .catch(erro => console.log(`Erro: ${erro}`))
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.add('hidden')
+  }
+})
+
+// Enter no campo de busca
+document.getElementById('busca').addEventListener('keydown', (evento) => {
+  if (evento.key === 'Enter') buscarFilmes(1)
+})
